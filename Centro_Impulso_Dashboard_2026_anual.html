@@ -1,0 +1,2703 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=ai-legible&utm_source=comment&utm_medium=referral&utm_id=0994a09a-98f4-48cc-8b31-76ed9a1bcc94
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+<meta name="hosting-provider" content="Netlify">
+<meta name="netlify-deploy" content="https://netlify.new/?utm_campaign=ai-legible&amp;utm_source=meta&amp;utm_medium=referral&amp;utm_id=0994a09a-98f4-48cc-8b31-76ed9a1bcc94">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Centro Impulso — Dashboard 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>if(window['pdfjsLib']){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';}</script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+<style>
+:root{
+  --bg:#0b0c0f;--s1:#13141a;--s2:#1a1b23;--s3:#22232e;--border:#2c2d3a;
+  --lime:#c8f135;--cyan:#35d4f1;--pink:#f1357a;--purple:#9b5cf6;
+  --orange:#f18135;--teal:#35f1b8;--yellow:#f1d435;
+  --text:#eeeef5;--muted:#7a7a90;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--border);background:var(--s1);position:sticky;top:0;z-index:200;flex-wrap:wrap;gap:10px;}
+.logo{display:flex;flex-direction:column;line-height:1;}
+.logo-main{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:5px;color:var(--lime);}
+.logo-sub{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:4px;color:var(--muted);}
+.tabs{display:flex;gap:5px;flex-wrap:wrap;}
+.tab{background:none;border:1px solid var(--border);color:var(--muted);padding:6px 13px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all .2s;}
+.tab:hover{border-color:var(--lime);color:var(--text);}
+.tab.active{background:var(--lime);color:#000;border-color:var(--lime);font-weight:600;}
+.nav-right{display:flex;align-items:center;gap:8px;}
+.msel{background:var(--s2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:8px;font-size:12px;outline:none;cursor:pointer;}
+.msel:focus{border-color:var(--lime);}
+.yr{background:var(--lime);color:#000;padding:5px 12px;border-radius:6px;font-weight:700;font-size:12px;}
+.page{display:none;padding:20px 24px;gap:16px;flex-direction:column;}
+.page.active{display:flex;}
+/* KPI */
+.krow{display:grid;gap:11px;}
+.kpi{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;transition:transform .2s;cursor:default;}
+.kpi:hover{transform:translateY(-2px);}
+.kpi::after{content:'';position:absolute;top:0;right:0;width:48px;height:48px;border-radius:0 12px 0 48px;opacity:.1;}
+.kpi.lime{border-left:3px solid var(--lime);}.kpi.lime::after{background:var(--lime);}.kpi.lime .kv{color:var(--lime);}
+.kpi.cyan{border-left:3px solid var(--cyan);}.kpi.cyan::after{background:var(--cyan);}.kpi.cyan .kv{color:var(--cyan);}
+.kpi.pink{border-left:3px solid var(--pink);}.kpi.pink::after{background:var(--pink);}.kpi.pink .kv{color:var(--pink);}
+.kpi.purple{border-left:3px solid var(--purple);}.kpi.purple::after{background:var(--purple);}.kpi.purple .kv{color:var(--purple);}
+.kpi.orange{border-left:3px solid var(--orange);}.kpi.orange::after{background:var(--orange);}.kpi.orange .kv{color:var(--orange);}
+.kpi.teal{border-left:3px solid var(--teal);}.kpi.teal::after{background:var(--teal);}.kpi.teal .kv{color:var(--teal);}
+.kpi.yellow{border-left:3px solid var(--yellow);}.kpi.yellow::after{background:var(--yellow);}.kpi.yellow .kv{color:var(--yellow);}
+.kl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.kv{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;line-height:1;}
+.kd{font-size:10px;color:var(--muted);margin-top:4px;}
+.up{color:var(--lime);}.dn{color:var(--pink);}
+.g2{display:grid;grid-template-columns:2fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.g2e{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;}
+.span2{grid-column:span 2;}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:18px;}
+.ch{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+.ct{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;}
+.cs{font-size:10px;color:var(--muted);margin-top:2px;}
+.pill{font-size:9px;padding:2px 8px;border-radius:20px;font-weight:600;letter-spacing:.5px;white-space:nowrap;}
+.pl{background:rgba(200,241,53,.12);color:var(--lime);}
+.pc{background:rgba(53,212,241,.12);color:var(--cyan);}
+.pp{background:rgba(155,92,246,.12);color:var(--purple);}
+.po{background:rgba(241,129,53,.12);color:var(--orange);}
+.py{background:rgba(241,212,53,.12);color:var(--yellow);}
+.pt{background:rgba(53,241,184,.12);color:var(--teal);}
+canvas{max-height:210px;}
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{text-align:left;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding-bottom:8px;border-bottom:1px solid var(--border);}
+.tbl tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s;}
+.tbl tr:hover{background:var(--s2);}
+.tbl tr:last-child{border-bottom:none;}
+.tbl td{padding:9px 4px;font-size:12px;vertical-align:middle;}
+.tbl .total-row td{color:var(--lime);font-weight:600;border-top:1px solid var(--border);}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px;}
+.mb{background:var(--s3);border-radius:3px;height:4px;margin-top:3px;overflow:hidden;}
+.mf{height:100%;border-radius:3px;}
+.freq-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:4px;}
+.freq-box{background:var(--s2);border-radius:10px;padding:14px;text-align:center;}
+.freq-days{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--lime);}
+.freq-label{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.freq-users{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--text);}
+.freq-ing{font-size:10px;color:var(--muted);margin-top:3px;}
+.ip{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:18px;}
+.ig{display:grid;gap:8px;}
+.ir{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;}
+.il{font-size:11px;color:var(--muted);}
+.inf{background:var(--s1);border:1px solid var(--border);color:var(--text);padding:6px 9px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:12px;width:100%;outline:none;transition:border-color .2s;}
+.inf:focus{border-color:var(--lime);}
+.slabel{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:7px 0 4px;border-top:1px solid var(--border);margin-top:4px;}
+.slabel.first{border-top:none;padding-top:0;margin-top:0;}
+.btu{width:100%;margin-top:14px;background:var(--lime);color:#000;border:none;padding:11px;border-radius:9px;font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:2px;cursor:pointer;transition:opacity .2s,transform .1s;}
+.btu:hover{opacity:.88;}
+.btu:active{transform:scale(.98);}
+.lu{font-size:10px;color:var(--muted);text-align:center;margin-top:6px;}
+.sblock{background:var(--s2);border-radius:10px;padding:13px;}
+.sbig{font-family:'Bebas Neue',sans-serif;font-size:30px;}
+.ssub{font-size:10px;color:var(--muted);margin-top:3px;}
+.uc{background:linear-gradient(135deg,#141f05,var(--s1));border:1px solid rgba(200,241,53,.2);border-radius:12px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;min-height:170px;}
+.ubig{font-family:'Bebas Neue',sans-serif;font-size:38px;color:var(--lime);line-height:1;margin-top:5px;}
+.ubar{height:5px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:10px;}
+.ubf{height:100%;background:linear-gradient(90deg,var(--lime),#90e000);border-radius:4px;transition:width .8s;}
+.prog-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.prog-label{font-size:11px;color:var(--muted);width:120px;flex-shrink:0;}
+.prog-bar{flex:1;background:var(--s3);border-radius:4px;height:5px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:4px;transition:width .8s;}
+.prog-val{font-size:11px;width:50px;text-align:right;flex-shrink:0;}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--lime);color:#000;padding:8px 16px;border-radius:9px;font-weight:600;font-size:12px;opacity:0;transform:translateY(8px);transition:opacity .3s,transform .3s;z-index:999;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+.tab-section{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.stab{background:none;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;transition:all .2s;}
+.stab:hover{border-color:var(--cyan);color:var(--text);}
+.stab.active{background:var(--cyan);color:#000;border-color:var(--cyan);font-weight:600;}
+/* Rentabilidad badges */
+.rent-badge{display:inline-block;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:600;}
+.rent-pos{background:rgba(200,241,53,.15);color:var(--lime);}
+.rent-neg{background:rgba(241,53,122,.15);color:var(--pink);}
+.rent-neu{background:rgba(122,122,144,.15);color:var(--muted);}
+/* Group user boxes */
+.group-user-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px;}
+.group-box{background:var(--s2);border-radius:12px;padding:16px;border-top:3px solid;}
+.group-box-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.group-box-num{font-family:'Bebas Neue',sans-serif;font-size:36px;line-height:1;}
+.group-box-sub{font-size:10px;color:var(--muted);margin-top:4px;}
+.group-box-ing{font-family:'Bebas Neue',sans-serif;font-size:18px;margin-top:6px;}
+/* Bajas motivos */
+.baja-motivo-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.baja-motivo-label{font-size:11px;display:flex;align-items:center;gap:6px;}
+.baja-motivo-val{font-family:'Bebas Neue',sans-serif;font-size:18px;}
+/* Import modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--s1);border:1px solid var(--border);border-radius:16px;width:min(680px,95vw);max-height:90vh;overflow-y:auto;padding:28px;box-shadow:0 24px 60px rgba(0,0,0,.6);}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--lime);letter-spacing:2px;}
+.drop-zone{border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;margin:16px 0;}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--lime);background:rgba(200,241,53,.05);}
+.drop-icon{font-size:36px;margin-bottom:8px;}
+.drop-label{font-size:13px;color:var(--text);}
+.drop-sublabel{font-size:11px;color:var(--muted);margin-top:4px;}
+.import-steps{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.import-step{background:var(--s2);border-radius:8px;padding:12px;}
+.import-step-lbl{font-size:9px;color:var(--cyan);font-weight:700;letter-spacing:1px;margin-bottom:4px;}
+.import-step-txt{font-size:11px;color:var(--muted);}
+.import-status{margin:10px 0;padding:10px;border-radius:8px;font-size:12px;display:none;}
+.import-status.ok{background:rgba(200,241,53,.1);border:1px solid var(--lime);color:var(--lime);display:block;}
+.import-status.err{background:rgba(241,53,122,.12);border:1px solid var(--pink);color:var(--pink);display:block;}
+.import-status.info{background:rgba(53,212,241,.1);border:1px solid var(--cyan);color:var(--cyan);display:block;}
+/* IVA */
+.iva-badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:700;letter-spacing:.5px;}
+.iva-si{background:rgba(241,129,53,.15);color:var(--orange);}
+.iva-no{background:rgba(53,241,184,.12);color:var(--teal);}
+/* AI Analysis */
+.analysis-header{background:linear-gradient(135deg,rgba(200,241,53,.08),rgba(53,212,241,.05));border:1px solid rgba(200,241,53,.2);border-radius:14px;padding:20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.analysis-btn{background:var(--lime);color:#000;border:none;padding:12px 28px;border-radius:10px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:10px;}
+.analysis-btn:hover{opacity:.88;transform:translateY(-1px);}
+.analysis-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.analysis-body{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:24px;line-height:1.8;font-size:13px;}
+.analysis-body h2{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:var(--lime);margin:20px 0 8px;border-bottom:1px solid var(--border);padding-bottom:6px;}
+.analysis-body h2:first-child{margin-top:0;}
+.analysis-body h3{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--cyan);margin:14px 0 6px;letter-spacing:1px;}
+.analysis-body p{color:var(--text);margin-bottom:10px;}
+.analysis-body strong{color:var(--lime);}
+.analysis-body ul{margin:6px 0 10px 20px;}
+.analysis-body li{margin-bottom:5px;color:var(--text);}
+.spinner{width:18px;height:18px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:spin .8s linear infinite;display:none;}
+.spinner.active{display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.analysis-placeholder{text-align:center;padding:60px 20px;color:var(--muted);}
+.analysis-placeholder-icon{font-size:48px;margin-bottom:12px;}
+@media(max-width:1100px){.g2,.g3,.g2e,.g4{grid-template-columns:1fr!important;}.krow{grid-template-columns:repeat(2,1fr)!important;}.span2{grid-column:span 1;}.freq-grid{grid-template-columns:repeat(2,1fr)!important;}.group-user-grid{grid-template-columns:1fr!important;}.import-steps{grid-template-columns:1fr!important;}}
+/* Team management chips */
+.team-chip{display:inline-flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border);border-radius:20px;padding:4px 6px 4px 10px;font-size:11px;}
+.team-chip button{background:none;border:none;color:var(--pink);cursor:pointer;font-size:13px;line-height:1;padding:0 2px;}
+.team-chip button:hover{opacity:.7;}
+/* Editable list rows (gastos personalizados, colaboradores) */
+.list-row{display:flex;gap:6px;align-items:center;}
+.list-row .inf{margin:0;}
+.list-row-del{background:none;border:1px solid var(--border);color:var(--pink);border-radius:7px;width:32px;height:32px;flex-shrink:0;cursor:pointer;font-size:13px;}
+.list-row-del:hover{border-color:var(--pink);}
+.list-empty{font-size:11px;color:var(--muted);padding:4px 0;}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="logo"><span class="logo-main">CENTRO IMPULSO</span><span class="logo-sub">DASHBOARD 2026</span></div>
+  <div class="tabs">
+    <button class="tab active" onclick="showPage('resumen',this)">Resumen</button>
+    <button class="tab" onclick="showPage('grupal',this)">Grupal</button>
+    <button class="tab" onclick="showPage('ep',this)">E. Personal</button>
+    <button class="tab" onclick="showPage('salud',this)">Fisioterapia</button>
+    <button class="tab" onclick="showPage('colabs',this)">Colaboradores</button>
+    <button class="tab" onclick="showPage('gastos',this)">Gastos</button>
+    <button class="tab" onclick="showPage('rentabilidad',this)">Rentabilidad</button>
+    <button class="tab" onclick="showPage('proyeccion',this)">Proyección</button>
+    <button class="tab" onclick="showPage('ingresar',this)">Ingresar datos</button>
+    <button class="tab" onclick="showPage('analisis',this)">🤖 Análisis IA</button>
+  </div>
+  <div class="nav-right">
+    <div id="sync-status" style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--s2);white-space:nowrap" title="Sincronización con la nube">
+      <span id="sync-dot" style="width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block"></span>
+      <span id="sync-label">Conectando…</span>
+    </div>
+    <button onclick="openImportModal()" style="background:var(--s2);border:1px solid var(--lime);color:var(--lime);padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">📂 Importar PDF / Excel</button>
+    <select class="msel" id="msel" onchange="changeMonth()">
+      <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option>
+      <option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option>
+      <option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option>
+      <option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
+      <option value="12">📊 Anual</option>
+    </select>
+    <span class="yr">2026</span>
+  </div>
+</nav>
+
+<!-- ══ RESUMEN ══ -->
+<div class="page active" id="page-resumen">
+  <div class="krow" style="grid-template-columns:repeat(6,1fr)">
+    <div class="kpi lime"><div class="kl">Total Usuarios</div><div class="kv" id="r-total">—</div><div class="kd">vs ant: <span id="r-d-total">—</span></div></div>
+    <div class="kpi cyan"><div class="kl">Grupal General</div><div class="kv" id="r-grupal">—</div><div class="kd" id="r-grupal-d">—</div></div>
+    <div class="kpi yellow"><div class="kl">Senior</div><div class="kv" id="r-senior">—</div><div class="kd" id="r-senior-d">—</div></div>
+    <div class="kpi teal"><div class="kl">Corredores</div><div class="kv" id="r-corredores">—</div><div class="kd" id="r-corredores-d">—</div></div>
+    <div class="kpi orange"><div class="kl">Altas mes</div><div class="kv" id="r-altas">—</div><div class="kd">nuevas + antiguas</div></div>
+    <div class="kpi pink"><div class="kl">Bajas mes</div><div class="kv" id="r-bajas">—</div><div class="kd">vs ant: <span id="r-d-bajas">—</span></div></div>
+  </div>
+  <div class="krow" style="grid-template-columns:repeat(3,1fr)">
+    <div class="kpi lime"><div class="kl">Ingresos Totales</div><div class="kv" id="r-ing">—</div><div class="kd" id="r-ing-d">—</div></div>
+    <div class="kpi pink"><div class="kl">Gastos Totales</div><div class="kv" id="r-gas">—</div><div class="kd">del mes</div></div>
+    <div class="kpi teal"><div class="kl">Resultado Neto</div><div class="kv" id="r-util">—</div><div class="kd">beneficio/pérdida</div></div>
+  </div>
+  <div class="g2e">
+    <div class="card">
+      <div class="ch"><div><div class="ct">EVOLUCIÓN USUARIOS</div><div class="cs">General + Senior + Corredores</div></div><span class="pill pl">Año</span></div>
+      <canvas id="usersChart"></canvas>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct">ALTAS & BAJAS</div><div class="cs">Movimiento mensual</div></div></div>
+      <canvas id="altasChart"></canvas>
+    </div>
+  </div>
+  <div class="g2e">
+    <div class="card">
+      <div class="ch"><div><div class="ct">DISTRIBUCIÓN INGRESOS</div><div class="cs">Por línea de negocio</div></div></div>
+      <canvas id="distChart"></canvas>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct">MOTIVOS DE BAJAS</div><div class="cs">Acumulado anual</div></div><span class="pill po">Año 2026</span></div>
+      <canvas id="bajasMotivosChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ══ GRUPAL ══ -->
+<div class="page" id="page-grupal">
+  <div class="krow" style="grid-template-columns:repeat(5,1fr)">
+    <div class="kpi lime"><div class="kl">Total Usuarios Grupo</div><div class="kv" id="g-total">—</div><div class="kd">general+senior+corredores</div></div>
+    <div class="kpi cyan"><div class="kl">Ingresos Grupal</div><div class="kv" id="g-ing">—</div><div class="kd">del mes</div></div>
+    <div class="kpi orange"><div class="kl">Altas</div><div class="kv" id="g-altas">—</div><div class="kd">nuevas + antiguas</div></div>
+    <div class="kpi pink"><div class="kl">Bajas</div><div class="kv" id="g-bajas">—</div><div class="kd">del mes</div></div>
+    <div class="kpi purple"><div class="kl">Retención</div><div class="kv" id="g-ret">—</div><div class="kd">del mes</div></div>
+  </div>
+
+  <!-- Tres grupos de usuarios -->
+  <div class="card">
+    <div class="ch"><div><div class="ct">DISTRIBUCIÓN DE USUARIOS POR GRUPO</div><div class="cs">General · Senior · Corredores</div></div></div>
+    <div class="group-user-grid">
+      <div class="group-box" style="border-color:var(--cyan)">
+        <div class="group-box-title">Grupo General</div>
+        <div class="group-box-num" style="color:var(--cyan)" id="gb-general">—</div>
+        <div class="group-box-sub">usuarios activos</div>
+        <div class="group-box-ing" style="color:var(--cyan)" id="gb-general-ing">—</div>
+        <div style="font-size:9px;color:var(--muted);margin-top:2px">ingresos del mes</div>
+        <div style="margin-top:10px" id="gb-general-freq"></div>
+      </div>
+      <div class="group-box" style="border-color:var(--yellow)">
+        <div class="group-box-title">Grupo Senior</div>
+        <div class="group-box-num" style="color:var(--yellow)" id="gb-senior">—</div>
+        <div class="group-box-sub">usuarios activos</div>
+        <div class="group-box-ing" style="color:var(--yellow)" id="gb-senior-ing">—</div>
+        <div style="font-size:9px;color:var(--muted);margin-top:2px">ingresos del mes</div>
+        <div style="margin-top:8px;font-size:10px;color:var(--muted)" id="gb-senior-precio">—</div>
+      </div>
+      <div class="group-box" style="border-color:var(--teal)">
+        <div class="group-box-title">Corredores</div>
+        <div class="group-box-num" style="color:var(--teal)" id="gb-corredores">—</div>
+        <div class="group-box-sub">usuarios activos</div>
+        <div class="group-box-ing" style="color:var(--teal)" id="gb-corredores-ing">—</div>
+        <div style="font-size:9px;color:var(--muted);margin-top:2px">a 40€/mes</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2e">
+    <div class="card">
+      <div class="ch"><div><div class="ct">FRECUENCIA — GRUPO GENERAL</div><div class="cs">Usuarios por días/semana</div></div></div>
+      <div class="freq-grid" id="freqBoxes"></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct">BAJAS DEL MES POR MOTIVO</div><div class="cs">Desglose causas</div></div></div>
+      <div style="margin-top:8px" id="bajasDesglose"></div>
+      <div style="margin-top:16px">
+        <div class="ch"><div><div class="ct" style="font-size:12px">EVOLUCIÓN BAJAS POR MOTIVO</div></div></div>
+        <canvas id="bajasEvolChart" style="max-height:150px"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2e">
+    <div class="card">
+      <div class="ch"><div><div class="ct">DETALLE FRECUENCIA GENERAL</div></div></div>
+      <table class="tbl">
+        <thead><tr><th>Frecuencia</th><th>Usuarios</th><th>Precio/mes</th><th>Ingreso</th><th style="width:90px">% total</th></tr></thead>
+        <tbody id="freqTable"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct">EVOLUCIÓN GRUPOS</div><div class="cs">Usuarios por mes</div></div><span class="pill pl">Año</span></div>
+      <canvas id="grupalEvolChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EP ══ -->
+<div class="page" id="page-ep">
+  <div class="krow" style="grid-template-columns:repeat(5,1fr)">
+    <div class="kpi cyan"><div class="kl">Ingresos EP Total</div><div class="kv" id="ep-total">—</div><div class="kd">vs anterior: <span id="ep-d-total">—</span></div></div>
+    <div class="kpi lime"><div class="kl">Sesiones totales</div><div class="kv" id="ep-ses">—</div><div class="kd" id="ep-ses-d">del mes</div></div>
+    <div class="kpi purple"><div class="kl">Sesiones/día lab.</div><div class="kv" id="ep-sxd">—</div><div class="kd" id="ep-dias-lbl">—</div></div>
+    <div class="kpi orange"><div class="kl">Altas EP mes</div><div class="kv" id="ep-altas">—</div><div class="kd">nuevas + antiguas</div></div>
+    <div class="kpi pink"><div class="kl">Bajas EP mes</div><div class="kv" id="ep-bajas">—</div><div class="kd">clientes que dejan EP</div></div>
+  </div>
+  <div class="krow" style="grid-template-columns:repeat(3,1fr)">
+    <div class="kpi teal"><div class="kl">Ranking top</div><div class="kv" id="ep-top">—</div><div class="kd">entrenador del mes</div></div>
+    <div class="kpi yellow"><div class="kl">Sesiones año ant.</div><div class="kv" id="ep-yoy">—</div><div class="kd">mismo mes año anterior</div></div>
+    <div class="kpi lime"><div class="kl">Días laborables</div><div class="kv" id="ep-dias">—</div><div class="kd">del mes</div></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><div><div class="ct">ENTRENAMIENTO PERSONAL — POR ENTRENADOR</div><div class="cs">Selecciona entrenador para ver detalle + sesiones semanales</div></div><span class="pill pc">Mes actual</span></div>
+    <div class="tab-section" id="ep-pro-tabs"></div>
+    <div id="ep-pro-name" style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--cyan);margin-bottom:10px">MANOLO</div>
+    <div id="ep-pro-kpis" style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px"></div>
+    <table class="tbl">
+      <thead><tr><th>Servicio</th><th>Precio</th><th>Unidades</th><th>Ingreso</th><th style="width:90px">% total EP</th></tr></thead>
+      <tbody id="ep-pro-table"></tbody>
+    </table>
+  </div>
+
+  <div class="g2e">
+    <div class="card">
+      <div class="ch"><div><div class="ct">INGRESOS POR ENTRENADOR</div><div class="cs">Mes actual vs anterior</div></div><span class="pill pc">Comparativa</span></div>
+      <canvas id="trainerChart"></canvas>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct">SESIONES POR ENTRENADOR</div><div class="cs">Ranking + sesiones/día laborable</div></div></div>
+      <table class="tbl">
+        <thead><tr><th>Entrenador</th><th>Sesiones</th><th>Ses/día</th><th>Ingresos</th><th>vs ant.</th></tr></thead>
+        <tbody id="ep-rank-table"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="g2e">
+    <div class="card">
+      <div class="ch"><div><div class="ct">EVOLUCIÓN SESIONES EP</div><div class="cs">Total mensual vs año anterior</div></div><span class="pill pl">YoY</span></div>
+      <canvas id="epEvolChart"></canvas>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct">DISTRIBUCIÓN EP</div><div class="cs">Ingresos por entrenador</div></div></div>
+      <canvas id="trainerDonut"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FISIOTERAPIA ══ -->
+<div class="page" id="page-salud">
+  <div class="krow" style="grid-template-columns:repeat(3,1fr)">
+    <div class="kpi purple"><div class="kl">Ingresos Fisio Total</div><div class="kv" id="sal-fis">—</div><div class="kd" id="sal-fis-n">— sesiones</div></div>
+    <div class="kpi cyan"><div class="kl">Sesiones Individuales</div><div class="kv" id="sal-ind-tot">—</div><div class="kd" id="sal-ind-ing">—</div></div>
+    <div class="kpi lime"><div class="kl">Bonos Vendidos</div><div class="kv" id="sal-bon-tot">—</div><div class="kd" id="sal-bon-ing">—</div></div>
+  </div>
+  <div class="card">
+    <div class="ch"><div><div class="ct">FISIOTERAPIA — POR PROFESIONAL</div></div><span class="pill pp">Mes actual</span></div>
+    <div class="tab-section" id="fisio-pro-tabs"></div>
+    <div style="display:flex;gap:6px;margin-bottom:14px;margin-top:6px">
+      <button class="stab active" id="fisio-type-ind" onclick="showFisioType('ind',this)">Sesiones individuales</button>
+      <button class="stab" id="fisio-type-bon" onclick="showFisioType('bon',this)">Bonos</button>
+    </div>
+    <div id="fisio-pro-name" style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--purple);margin-bottom:10px">FRANCISCO SALINAS</div>
+    <div id="pro-kpis" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px"></div>
+    <div id="pro-ind-section">
+      <table class="tbl">
+        <thead><tr><th>Tipo sesión</th><th>Precio</th><th>Sesiones</th><th>Ingreso</th><th style="width:90px">% total fisio</th></tr></thead>
+        <tbody id="pro-ind-table"></tbody>
+      </table>
+    </div>
+    <div id="pro-bon-section" style="display:none">
+      <table class="tbl">
+        <thead><tr><th>Bono</th><th>Precio</th><th>Vendidos</th><th>Ingreso</th><th style="width:90px">% total fisio</th></tr></thead>
+        <tbody id="pro-bon-table"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="g2e">
+    <div class="card">
+      <div class="ch"><div><div class="ct">SESIONES POR PROFESIONAL</div><div class="cs">Comparativa mes actual vs anterior</div></div></div>
+      <canvas id="fisioProChart"></canvas>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct">RANKING PROFESIONALES</div></div></div>
+      <table class="tbl">
+        <thead><tr><th>Profesional</th><th>Ses. indiv.</th><th>Bonos</th><th>Total</th><th>Ingresos</th></tr></thead>
+        <tbody id="fisioRankTable"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="g3">
+    <div class="card">
+      <div class="ch"><div><div class="ct">DISTRIBUCIÓN FISIO</div></div></div>
+      <canvas id="fisioDonut"></canvas>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct">INGRESOS POR PROFESIONAL</div></div></div>
+      <canvas id="fisioProDonut"></canvas>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct">EVOLUCIÓN FISIO</div><div class="cs">Ingresos mensuales</div></div><span class="pill pp">Año</span></div>
+      <canvas id="fisioEvolChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ══ COLABORADORES ══ -->
+<div class="page" id="page-colabs">
+  <div class="krow" style="grid-template-columns:repeat(5,1fr)">
+    <div class="kpi orange"><div class="kl">Nutrición</div><div class="kv" id="sal-nut">—</div><div class="kd" id="sal-nut-n">— clientes</div></div>
+    <div class="kpi teal"><div class="kl">Psicología</div><div class="kv" id="sal-psi">—</div><div class="kd" id="sal-psi-n">— pacientes</div></div>
+    <div class="kpi cyan"><div class="kl">ProfutbolBase</div><div class="kv" id="col-pfb">—</div><div class="kd" id="col-pfb-n">— personas</div></div>
+    <div class="kpi yellow"><div class="kl">Otros colab.</div><div class="kv" id="col-otr">—</div><div class="kd" id="col-otr-n">— personas</div></div>
+    <div class="kpi lime"><div class="kl">Total Colaboradores</div><div class="kv" id="col-tot">—</div><div class="kd" id="col-personas">— personas</div></div>
+  </div>
+  <div class="g2e">
+    <div class="card">
+      <div class="ch"><div><div class="ct">EVOLUCIÓN COLABORADORES</div><div class="cs">Ingresos por servicio</div></div></div>
+      <canvas id="saludEvolChart"></canvas>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct">DETALLE DEL MES</div></div></div>
+      <table class="tbl">
+        <thead><tr><th>Servicio</th><th>Personas</th><th>Ingresos</th><th>€/persona</th><th>Notas</th></tr></thead>
+        <tbody id="saludTable"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch"><div><div class="ct">OTROS COLABORADORES — DETALLE</div><div class="cs">Empresas y personas colaboradoras del mes</div></div></div>
+    <table class="tbl">
+      <thead><tr><th>Colaborador</th><th>Aportación mensual</th></tr></thead>
+      <tbody id="colaboradoresDetailTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ GASTOS ══ -->
+<div class="page" id="page-gastos">
+  <div class="krow" style="grid-template-columns:repeat(5,1fr)">
+    <div class="kpi pink"><div class="kl">Gasto Operativo</div><div class="kv" id="ga-tot">—</div><div class="kd">vs anterior: <span id="ga-d-tot">—</span></div></div>
+    <div class="kpi orange"><div class="kl">Nóminas</div><div class="kv" id="ga-nom">—</div><div class="kd" id="ga-nom-p">—</div></div>
+    <div class="kpi purple"><div class="kl">Alquiler</div><div class="kv" id="ga-alq">—</div><div class="kd" id="ga-alq-p">—</div></div>
+    <div class="kpi cyan"><div class="kl">Impuestos</div><div class="kv" id="ga-imp">—</div><div class="kd" id="ga-imp-p">—</div></div>
+    <div class="kpi yellow"><div class="kl">Gastos Financieros</div><div class="kv" id="ga-fin">—</div><div class="kd" id="ga-fin-p">—</div></div>
+  </div>
+  <div class="krow" style="grid-template-columns:repeat(5,1fr)">
+    <div class="kpi teal"><div class="kl">Deuda Acumulada</div><div class="kv" id="ga-deu">—</div><div class="kd">saldo actual</div></div>
+    <div class="kpi lime"><div class="kl">Suministros</div><div class="kv" id="ga-sum">—</div><div class="kd" id="ga-sum-p">—</div></div>
+    <div class="kpi orange"><div class="kl">Material Fisio</div><div class="kv" id="ga-matf">—</div><div class="kd" id="ga-matf-p">—</div></div>
+    <div class="kpi cyan"><div class="kl">Material Entreno</div><div class="kv" id="ga-mate">—</div><div class="kd" id="ga-mate-p">—</div></div>
+    <div class="kpi purple"><div class="kl">Gastos Personalizados</div><div class="kv" id="ga-custom">—</div><div class="kd" id="ga-custom-p">—</div></div>
+  </div>
+  <div class="g2e">
+    <div class="card">
+      <div class="ch"><div><div class="ct">DESGLOSE DE GASTOS</div><div class="cs">Distribución del mes</div></div><span class="pill po">Mes actual</span></div>
+      <canvas id="gastoDonut"></canvas>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct">PESO POR CATEGORÍA</div></div></div>
+      <div style="margin-top:8px" id="gastosBars"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch"><div><div class="ct">EVOLUCIÓN DE GASTOS</div><div class="cs">Por categoría, mensual</div></div><span class="pill pl">Stacked</span></div>
+    <canvas id="gastoStack" style="max-height:180px"></canvas>
+  </div>
+  <div class="card">
+    <div class="ch"><div><div class="ct">GASTOS PERSONALIZADOS DEL MES</div><div class="cs">Detalle nombre + cantidad</div></div></div>
+    <table class="tbl">
+      <thead><tr><th>Nombre</th><th>Cantidad</th></tr></thead>
+      <tbody id="gastosCustomTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ RENTABILIDAD ══ -->
+<div class="page" id="page-rentabilidad">
+  <div class="krow" style="grid-template-columns:repeat(3,1fr)">
+    <div class="kpi lime"><div class="kl">Resultado Neto Centro</div><div class="kv" id="rent-neto">—</div><div class="kd">ingresos − gastos totales</div></div>
+    <div class="kpi cyan"><div class="kl">Margen Bruto</div><div class="kv" id="rent-margen">—</div><div class="kd">sobre ingresos</div></div>
+    <div class="kpi teal"><div class="kl">Coste Total Personal</div><div class="kv" id="rent-coste-personal">—</div><div class="kd">nóminas + extras</div></div>
+  </div>
+
+  <!-- Rentabilidad Fisios -->
+  <div class="card">
+    <div class="ch"><div><div class="ct">RENTABILIDAD FISIOTERAPEUTAS</div><div class="cs">Facturación · Coste empresa · Extras · Resultado</div></div><span class="pill pp">Fisio</span></div>
+    <table class="tbl">
+      <thead><tr><th>Profesional</th><th>Ses./Bonos</th><th>Clinic+Efvo</th><th>Facturación total</th><th>Nómina empresa</th><th>Extra (auto+manual)</th><th>Coste total</th><th>Margen</th><th>%</th></tr></thead>
+      <tbody id="fisio-rent-table"></tbody>
+    </table>
+    <div style="margin-top:16px;padding:12px;background:var(--s2);border-radius:8px;font-size:11px;color:var(--muted)">
+      <strong style="color:var(--text)">Fórmulas extras:</strong>
+      Gregorio: a partir de 3.400€ → bloques de 500€: 1º×50% (250€) · 2º×40% (200€) · 3º en adelante ×30% (150€/bloque) |
+      Alex: a partir de 2.300€ → mismo esquema de bloques |
+      Andrea: horas extra a 12€/hora |
+      Fran: nómina fija 3.000€ + extras (a definir)
+    </div>
+  </div>
+
+  <!-- Rentabilidad Entrenadores -->
+  <div class="card">
+    <div class="ch"><div><div class="ct">RENTABILIDAD ENTRENADORES</div><div class="cs">EP facturado · Horas grupo · Coste empresa · Margen</div></div><span class="pill pc">EP+Grupal</span></div>
+    <table class="tbl">
+      <thead><tr><th>Entrenador</th><th>Ses. EP</th><th>Ing. EP</th><th>Horas grupo</th><th>Ing. grupo asig.</th><th>Nómina emp.</th><th>Extra</th><th>Coste total</th><th>Margen</th></tr></thead>
+      <tbody id="train-rent-table"></tbody>
+    </table>
+    <div style="margin-top:12px;padding:12px;background:var(--s2);border-radius:8px;font-size:11px;color:var(--muted)">
+      <strong style="color:var(--text)">Horas grupo mes:</strong>
+      Se introducen manualmente por entrenador en "Ingresar datos". El ingreso asignado es proporcional a las horas impartidas sobre el total de horas del mes.
+    </div>
+    <div id="rent-grupo-desglose" style="margin-top:8px;padding:12px;background:var(--s2);border-radius:8px;font-size:11px;color:var(--muted)"></div>
+  </div>
+
+  <div class="g2e">
+    <div class="card">
+      <div class="ch"><div><div class="ct">MARGEN POR TRABAJADOR</div><div class="cs">Facturado vs coste</div></div></div>
+      <canvas id="rentChart"></canvas>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct">COSTE VS FACTURACIÓN</div><div class="cs">Distribución del equipo</div></div></div>
+      <canvas id="rentDonut"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PROYECCIÓN ══ -->
+<div class="page" id="page-proyeccion">
+  <div class="krow" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi lime"><div class="kl">Proyección Dic</div><div class="kv" id="p-usr">—</div><div class="kd" id="p-usr-sub">—</div></div>
+    <div class="kpi cyan"><div class="kl">Altas acumuladas</div><div class="kv" id="ac-altas">—</div><div class="kd">temporada</div></div>
+    <div class="kpi pink"><div class="kl">Bajas acumuladas</div><div class="kv" id="ac-bajas">—</div><div class="kd">temporada</div></div>
+    <div class="kpi teal"><div class="kl">Balance neto</div><div class="kv" id="ac-balance">—</div><div class="kd">altas − bajas</div></div>
+  </div>
+  <div class="g2e">
+    <div class="card">
+      <div class="ch"><div><div class="ct">PROYECCIÓN DE USUARIOS</div><div class="cs">Tendencia lineal</div></div><span class="pill pl">Tendencia</span></div>
+      <canvas id="projChart"></canvas>
+    </div>
+    <div class="card">
+      <div class="ch"><div><div class="ct">META DE USUARIOS</div></div></div>
+      <div style="margin-top:8px">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:6px" id="meta-pct-lbl2">—</div>
+        <div class="ubar"><div class="ubf" id="meta-bar2" style="width:0%"></div></div>
+        <div style="margin-top:12px;display:flex;gap:20px">
+          <div><div class="kl">Actual</div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--lime)" id="p-meta-pct">—</div></div>
+          <div><div class="kl">Máximo año</div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--cyan)" id="meta-max">—</div></div>
+          <div><div class="kl">Meta</div><input type="number" id="meta-input" value="230" style="width:60px;background:var(--s3);border:1px solid var(--border);color:var(--lime);padding:3px 6px;border-radius:5px;font-family:'Bebas Neue',sans-serif;font-size:18px;text-align:right;outline:none;" onchange="renderAll()"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ INGRESAR ══ -->
+<div class="page" id="page-ingresar">
+  <div class="card">
+    <div class="ch"><div><div class="ct">EQUIPO — GESTIÓN DE PROFESIONALES</div><div class="cs">Añade o quita entrenadores y fisioterapeutas. Al quitar a alguien sus datos históricos se conservan, solo deja de aparecer en tablas y gráficos.</div></div></div>
+    <div class="g2e">
+      <div>
+        <div class="slabel first">Entrenadores</div>
+        <div id="team-trainers-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
+        <div style="display:flex;gap:6px">
+          <input class="inf" type="text" id="team-trainer-new" placeholder="Nombre del entrenador">
+          <button class="stab" style="white-space:nowrap" onclick="addTrainerUI()">+ Añadir</button>
+        </div>
+      </div>
+      <div>
+        <div class="slabel first">Fisioterapeutas</div>
+        <div id="team-fisios-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
+        <div style="display:flex;gap:6px">
+          <input class="inf" type="text" id="team-fisio-new" placeholder="Nombre del fisioterapeuta">
+          <button class="stab" style="white-space:nowrap" onclick="addFisioUI()">+ Añadir</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;align-items:start">
+
+    <!-- COL 1: GRUPAL -->
+    <div class="ip">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;margin-bottom:12px">ENTRENAMIENTO GRUPAL</div>
+      <div class="ig">
+        <div class="slabel first">Grupo General — frecuencia y precio</div>
+        <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:6px;align-items:center;margin-bottom:4px">
+          <div style="font-size:9px;color:var(--muted)">Días</div><div style="font-size:9px;color:var(--muted)">Usuarios</div><div style="font-size:9px;color:var(--muted)">Precio €/mes</div>
+        </div>
+        <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:6px;align-items:center"><span class="il">1 día</span><input class="inf" type="number" id="i-d1" placeholder="0" min="0"><input class="inf" type="number" id="i-d1p" placeholder="22" min="0"></div>
+        <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:6px;align-items:center"><span class="il">2 días</span><input class="inf" type="number" id="i-d2" placeholder="0" min="0"><input class="inf" type="number" id="i-d2p" placeholder="32" min="0"></div>
+        <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:6px;align-items:center"><span class="il">3 días</span><input class="inf" type="number" id="i-d3" placeholder="0" min="0"><input class="inf" type="number" id="i-d3p" placeholder="40" min="0"></div>
+        <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:6px;align-items:center"><span class="il">4 días</span><input class="inf" type="number" id="i-d4" placeholder="0" min="0"><input class="inf" type="number" id="i-d4p" placeholder="46" min="0"></div>
+        <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:6px;align-items:center"><span class="il">5 días</span><input class="inf" type="number" id="i-d5" placeholder="0" min="0"><input class="inf" type="number" id="i-d5p" placeholder="50" min="0"></div>
+
+        <div class="slabel">Grupo Senior</div>
+        <div class="ir"><div class="il">Usuarios Senior</div><input class="inf" type="number" id="i-senior" placeholder="0" min="0"></div>
+        <div class="ir"><div class="il">Precio Senior (€/mes)</div><input class="inf" type="number" id="i-seniorp" placeholder="28" min="0"></div>
+
+        <div class="slabel">Corredores</div>
+        <div class="ir"><div class="il">Usuarios Corredores</div><input class="inf" type="number" id="i-corredores" placeholder="0" min="0"></div>
+        <div class="ir"><div class="il">Precio corredor (€)</div><input class="inf" type="number" id="i-corredoresp" placeholder="40" min="0"></div>
+        <div class="ir"><div class="il">Altas corredores</div><input class="inf" type="number" id="i-corr-altas" placeholder="0" min="0"></div>
+        <div class="ir"><div class="il">Bajas corredores</div><input class="inf" type="number" id="i-corr-bajas" placeholder="0" min="0"></div>
+
+        <div class="slabel">Facturación grupal — oficial vs no oficial</div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:6px">La parte "oficial" se calcula sola con las cuotas de arriba. Aquí solo metes el efectivo/no oficial extra que se reparte entre entrenadores según sus horas de grupo.</div>
+        <div class="ir"><div class="il">Ingreso grupal no oficial / efectivo (€)</div><input class="inf" type="number" id="i-grupo-noof" placeholder="0" min="0"></div>
+
+        <div class="slabel">Movimiento del mes (Grupo General)</div>
+        <div class="ir"><div class="il">Altas nuevas</div><input class="inf" type="number" id="i-altas-n" placeholder="0" min="0"></div>
+        <div class="ir"><div class="il">Altas antiguas</div><input class="inf" type="number" id="i-altas-a" placeholder="0" min="0"></div>
+
+        <div style="margin-top:4px">
+          <div class="slabel">Bajas del mes por motivo</div>
+          <div class="ir"><div class="il" style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#f1357a;display:inline-block"></span>Lesión</div><input class="inf" type="number" id="i-bajas-les" placeholder="0" min="0" oninput="syncBajas()"></div>
+          <div class="ir"><div class="il" style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#f18135;display:inline-block"></span>Trabajo</div><input class="inf" type="number" id="i-bajas-tra" placeholder="0" min="0" oninput="syncBajas()"></div>
+          <div class="ir"><div class="il" style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#35d4f1;display:inline-block"></span>Cambio residencia</div><input class="inf" type="number" id="i-bajas-res" placeholder="0" min="0" oninput="syncBajas()"></div>
+          <div class="ir"><div class="il" style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#7a7a90;display:inline-block"></span>No sabemos</div><input class="inf" type="number" id="i-bajas-nc" placeholder="0" min="0" oninput="syncBajas()"></div>
+          <div class="ir" style="margin-top:4px;padding-top:6px;border-top:1px solid var(--border)">
+            <div class="il" style="font-weight:600;color:var(--text)">Total bajas</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--pink)" id="bajas-total-display">0</div>
+          </div>
+        </div>
+
+        <div class="slabel">Año anterior (mismo mes)</div>
+        <div class="ir"><div class="il">Total usuarios año ant.</div><input class="inf" type="number" id="i-yoy-usr" placeholder="0" min="0"></div>
+        <div class="slabel">Entrenamiento Personal</div>
+        <div class="ir"><div class="il">Días laborables</div><input class="inf" type="number" id="i-diaslab" placeholder="20" min="0"></div>
+        <div class="ir"><div class="il">Sesiones EP año ant.</div><input class="inf" type="number" id="i-ep-yoy" placeholder="0" min="0"></div>
+        <!-- Altas/bajas EP -->
+        <div class="slabel">Altas y bajas clientes EP</div>
+        <div class="ir"><div class="il">Altas nuevas EP</div><input class="inf" type="number" id="i-ep-altas-n" placeholder="0" min="0"></div>
+        <div class="ir"><div class="il">Altas antiguas EP</div><input class="inf" type="number" id="i-ep-altas-a" placeholder="0" min="0"></div>
+        <div class="ir"><div class="il">Bajas EP</div><input class="inf" type="number" id="i-ep-bajas" placeholder="0" min="0"></div>
+      </div>
+    </div>
+
+    <!-- COL 2: EP + FISIO + COLABORADORES -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="ip">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;margin-bottom:12px">ENTRENAMIENTO PERSONAL</div>
+        <div class="ig">
+          <div class="slabel first">Selecciona entrenador</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px" id="inp-ep-tabs"></div>
+          <div id="inp-ep-name" style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);margin-bottom:6px">Manolo</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:3px">
+            <div style="font-size:9px;color:var(--muted)">Servicio</div>
+            <div style="font-size:9px;color:var(--muted)">Sesiones</div>
+          </div>
+          <div id="inp-ep-grid"></div>
+          <div class="slabel">Horas grupo este mes</div>
+          <div class="ir"><div class="il">Horas grupo impartidas</div><input class="inf" type="number" id="inp-ep-horas" placeholder="0" min="0" step="0.5"></div>
+          <div class="slabel">Facturación total (Clinic Cloud + Efectivo)</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:6px">Se suma a las sesiones de arriba para la facturación total del entrenador.</div>
+          <div class="ir"><div class="il">Facturación Clinic Cloud (€)</div><input class="inf" type="number" id="inp-ep-clinic" placeholder="0" min="0"></div>
+          <div class="ir"><div class="il">Efectivo (€)</div><input class="inf" type="number" id="inp-ep-efectivo" placeholder="0" min="0"></div>
+        </div>
+      </div>
+
+      <div class="ip">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;margin-bottom:12px">FISIOTERAPIA</div>
+        <div class="ig">
+          <div class="slabel first">Selecciona profesional</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px" id="inp-pro-tabs"></div>
+          <div id="inp-pro-name" style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--purple);margin-bottom:6px">Francisco Salinas</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:3px">
+            <div style="font-size:9px;color:var(--muted)">Tipo sesión</div>
+            <div style="font-size:9px;color:var(--muted)">Precio</div>
+            <div style="font-size:9px;color:var(--muted)">Sesiones</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px" id="inp-ind-grid"></div>
+          <div class="slabel">Bonos vendidos</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:3px">
+            <div style="font-size:9px;color:var(--muted)">Bono</div>
+            <div style="font-size:9px;color:var(--muted)">Precio</div>
+            <div style="font-size:9px;color:var(--muted)">Unidades</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px" id="inp-bon-grid"></div>
+          <div class="slabel">Facturación total (Clinic Cloud + Efectivo)</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:6px">Se suma a las sesiones/bonos de arriba para la facturación total del profesional.</div>
+          <div class="ir"><div class="il">Facturación Clinic Cloud (€)</div><input class="inf" type="number" id="inp-fisio-clinic" placeholder="0" min="0"></div>
+          <div class="ir"><div class="il">Efectivo (€)</div><input class="inf" type="number" id="inp-fisio-efectivo" placeholder="0" min="0"></div>
+          <div class="slabel">Coste empresa este mes</div>
+          <div class="ir"><div class="il">Nómina empresa (€)</div><input class="inf" type="number" id="inp-fisio-nomina" placeholder="0" min="0"></div>
+          <div style="font-size:9px;color:var(--muted);margin:2px 0 4px">El "Extra manual" se gestiona en la sección "COSTE FISIOTERAPEUTAS" más abajo.</div>
+          <div id="inp-fisio-extra-row">
+            <div class="ir"><div class="il">Horas extra (Andrea)</div><input class="inf" type="number" id="inp-fisio-horasextra" placeholder="0" min="0" step="0.5"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ip">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;margin-bottom:12px">COLABORADORES</div>
+        <div class="ig">
+          <div class="slabel first">Nutrición</div>
+          <div class="ir"><div class="il">Clientes</div><input class="inf" type="number" id="i-nc" placeholder="0" min="0"></div>
+          <div class="ir"><div class="il">Ingresos (€)</div><input class="inf" type="number" id="i-ni" placeholder="0" min="0"></div>
+          <div class="ir"><div class="il">Notas</div><input class="inf" type="text" id="i-nc-nota" placeholder="—"></div>
+          <div class="slabel">Psicología</div>
+          <div class="ir"><div class="il">Pacientes</div><input class="inf" type="number" id="i-pp" placeholder="0" min="0"></div>
+          <div class="ir"><div class="il">Ingresos (€)</div><input class="inf" type="number" id="i-pi" placeholder="0" min="0"></div>
+          <div class="ir"><div class="il">Notas</div><input class="inf" type="text" id="i-pp-nota" placeholder="—"></div>
+          <div class="slabel">ProfutbolBase</div>
+          <div class="ir"><div class="il">Personas</div><input class="inf" type="number" id="i-pfb-n" placeholder="0" min="0"></div>
+          <div class="ir"><div class="il">Ingresos (€)</div><input class="inf" type="number" id="i-pfb-i" placeholder="0" min="0"></div>
+          <div class="ir"><div class="il">Notas</div><input class="inf" type="text" id="i-pfb-nota" placeholder="—"></div>
+          <div class="slabel">Otros colaboradores</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:6px">Añade cada empresa o persona colaboradora con la cantidad que aporta ese mes.</div>
+          <div id="colaboradores-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:6px"></div>
+          <div class="list-row">
+            <input class="inf" type="text" id="col-new-nombre" placeholder="Empresa o persona" style="flex:2">
+            <input class="inf" type="number" id="col-new-cantidad" placeholder="€/mes" min="0" style="flex:1">
+            <button class="stab" style="white-space:nowrap" onclick="addColaborador()">+ Añadir</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 3: GASTOS + RENTABILIDAD ENTRENADORES -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="ip">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;margin-bottom:12px">GASTOS</div>
+        <div class="ig">
+          <div class="slabel first">Gastos operativos</div>
+          <div class="ir"><div class="il">Nóminas totales (€)</div><input class="inf" type="number" id="i-nom" placeholder="0" min="0"></div>
+          <div class="ir"><div class="il">Alquiler (€)</div><input class="inf" type="number" id="i-alq" placeholder="0" min="0"></div>
+          <div class="ir"><div class="il">Suministros (€)</div><input class="inf" type="number" id="i-sum" placeholder="0" min="0"></div>
+          <div class="ir"><div class="il">Marketing (€)</div><input class="inf" type="number" id="i-mkt" placeholder="0" min="0"></div>
+          <div class="ir"><div class="il">Mantenimiento (€)</div><input class="inf" type="number" id="i-man" placeholder="0" min="0"></div>
+          <div class="ir"><div class="il">Material Fisioterapia (€)</div><input class="inf" type="number" id="i-matf" placeholder="0" min="0"></div>
+          <div class="ir"><div class="il">Material Entrenamiento (€)</div><input class="inf" type="number" id="i-mate" placeholder="0" min="0"></div>
+          <div class="ir"><div class="il">Otros gastos (€)</div><input class="inf" type="number" id="i-otr" placeholder="0" min="0"></div>
+          <div class="slabel">Gastos personalizados</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:6px">Añade cualquier gasto suelto con su nombre y cantidad. Se suma al total del mes.</div>
+          <div id="gastos-custom-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:6px"></div>
+          <div class="list-row">
+            <input class="inf" type="text" id="gc-new-nombre" placeholder="Nombre del gasto" style="flex:2">
+            <input class="inf" type="number" id="gc-new-cantidad" placeholder="€" min="0" style="flex:1">
+            <button class="stab" style="white-space:nowrap" onclick="addGastoCustom()">+ Añadir</button>
+          </div>
+          <div class="slabel">Fiscal y financiero</div>
+          <div class="ir"><div class="il">Impuestos (€)</div><input class="inf" type="number" id="i-imp" placeholder="0" min="0"></div>
+          <div class="ir"><div class="il">Gastos financieros (€)</div><input class="inf" type="number" id="i-fin" placeholder="0" min="0"></div>
+          <div class="slabel">Deuda</div>
+          <div class="ir"><div class="il">Saldo deuda actual (€)</div><input class="inf" type="number" id="i-deu" placeholder="0" min="0"></div>
+          
+          <div class="slabel">IVA — Ingresos no sujetos a IVA</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:6px">Fisioterapia no lleva IVA. Marca aqui el importe de ingresos de entrenamiento SIN IVA (bonos, convenios...)</div>
+          <div class="ir"><div class="il">Ingresos sin IVA (€)</div><input class="inf" type="number" id="i-noiva" placeholder="0" min="0"></div>
+          <div id="iva-calc" style="background:var(--s3);border-radius:8px;padding:10px;margin-top:6px;font-size:11px;color:var(--muted)">El IVA se calculará automáticamente al guardar.</div>
+        </div>
+      </div>
+      <div class="ip">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;margin-bottom:12px">COSTE ENTRENADORES</div>
+        <div class="ig">
+          <div class="slabel first">Nómina empresa + extra mensual</div>
+          <div id="train-cost-grid"></div>
+        </div>
+      </div>
+      <div class="ip">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;margin-bottom:12px">COSTE FISIOTERAPEUTAS</div>
+        <div class="ig">
+          <div class="slabel first">Nómina empresa mensual</div>
+          <div id="fisio-cost-grid"></div>
+        </div>
+      </div>
+      <button class="btu" onclick="updateMonth()">GUARDAR MES</button>
+      <div class="lu" id="lu"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast">✓ Datos guardados</div>
+
+<!-- ══ ANÁLISIS IA ══ -->
+<div class="page" id="page-analisis">
+  <div class="analysis-header">
+    <div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--lime)">ANÁLISIS CEO — IA</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Informe ejecutivo completo generado por Claude · Comparativa mensual, anual y recomendaciones</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <div style="font-size:11px;color:var(--muted)">Analizando: <span id="analysis-mes-label" style="color:var(--text)">—</span></div>
+      <button class="analysis-btn" id="analysis-btn" onclick="generateAnalysis()">
+        <span class="spinner" id="analysis-spinner"></span>
+        <span id="analysis-btn-text">⚡ GENERAR ANÁLISIS</span>
+      </button>
+    </div>
+  </div>
+  <div id="analysis-output">
+    <div class="analysis-placeholder">
+      <div class="analysis-placeholder-icon">🧠</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--muted);letter-spacing:1px">LISTO PARA ANALIZAR</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">Pulsa "Generar análisis" para obtener el informe ejecutivo completo del mes seleccionado</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ IMPORT MODAL ══ -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal-box" style="width:min(920px,95vw)">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
+      <div>
+        <div class="modal-title">IMPORTAR DATOS</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">Sube PDFs de Clinic Cloud (informe de citas, resumen por servicio), el informe de Gastos o el Informe de Grupos mensual. Se leen en tu navegador, sin conexión a ningún servidor.</div>
+      </div>
+      <button onclick="closeImportModal()" style="background:var(--s3);border:1px solid var(--border);color:var(--muted);width:32px;height:32px;border-radius:8px;font-size:18px;cursor:pointer;flex-shrink:0">✕</button>
+    </div>
+    <div class="import-steps">
+      <div class="import-step"><div class="import-step-lbl">PASO 1 — ARCHIVOS</div><div class="import-step-txt">Sube uno o varios PDF: Clinic Cloud (citas / resumen), Gastos o Informe de Grupos</div></div>
+      <div class="import-step"><div class="import-step-lbl">PASO 2 — LECTURA LOCAL</div><div class="import-step-txt">El dashboard reconoce el tipo de informe y extrae los datos automáticamente, sin IA ni internet</div></div>
+      <div class="import-step"><div class="import-step-lbl">PASO 3 — REVISIÓN</div><div class="import-step-txt">Verifica los importes detectados por profesional antes de confirmar</div></div>
+      <div class="import-step"><div class="import-step-lbl">PASO 4 — GUARDAR</div><div class="import-step-txt">Se rellenan facturación, gastos o estadísticas de usuarios en el mes elegido</div></div>
+    </div>
+    <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+      <div class="drop-icon">📄</div>
+      <div class="drop-label">Arrastra aquí tus PDF o haz clic para seleccionar</div>
+      <div class="drop-sublabel">Clinic Cloud (citas/resumen) · Gastos · Informe de Grupos — puedes subir varios a la vez</div>
+    </div>
+    <input type="file" id="file-input" accept=".pdf,.xlsx,.xls,.csv" multiple style="display:none" onchange="handleFileSelect(event)">
+    <div id="import-status" class="import-status"></div>
+    <div id="import-preview" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;color:var(--cyan)">DATOS DETECTADOS — REVISAR ANTES DE CONFIRMAR</div>
+        <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+          <div style="display:flex;gap:6px;align-items:center;font-size:11px;color:var(--muted)">Mes destino:
+            <select class="msel" id="import-mes-select" style="padding:4px 8px"></select>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;font-size:11px;color:var(--muted)">Aplicar:
+            <select class="msel" id="import-figure-select" style="padding:4px 8px" onchange="renderImportPreview()">
+              <option value="importe">Importe facturado</option>
+              <option value="pagado">Pagado (cobrado)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div id="import-preview-content" style="background:var(--s2);border-radius:8px;padding:14px;font-size:12px;max-height:380px;overflow-y:auto;"></div>
+      <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
+        <button onclick="closeImportModal()" style="background:var(--s3);border:1px solid var(--border);color:var(--muted);padding:10px 22px;border-radius:8px;font-size:12px;cursor:pointer">Cancelar</button>
+        <button id="confirm-import-btn" onclick="confirmImport()" style="background:var(--lime);border:none;color:#000;padding:10px 28px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:1px">✓ CONFIRMAR IMPORTACIÓN</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══ CONSTANTS ═══
+const MN=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const KEY='impulso_v3';
+let TRAINERS=['Manolo','Juanmi','Ruiz','Zaragoza','Miguel','Javi','Morata','Luis'];
+const PALETTE=['#35d4f1','#c8f135','#f1357a','#9b5cf6','#f18135','#35f1b8','#f1d435','#ff6b6b','#a29bfe','#35a8d4','#e07030','#7a7a90','#2a9aa0','#c06020','#5b3dab','#1c7240'];
+const colorAt=i=>PALETTE[i%PALETTE.length];
+const GC={nom:'#f1357a',alq:'#f18135',sum:'#35d4f1',mkt:'#c8f135',man:'#35f1b8',matf:'#9b5cf6',mate:'#f1d435',otr:'#7a7a90',imp:'#ff6b6b',fin:'#a29bfe',custom:'#00d2ff'};
+let FPROS=['Francisco Salinas','Gregorio','Alejandro Camacho','Andrea'];
+let FPRO_KEYS=['fsal','greg','acam','andr'];
+
+const EP_LABELS=['Bono 10 ses. Pareja','Bono 4 ses. Pareja','Bono 10 ses. (280€)','Bono 10 ses. (270€)','Bono 10 ses. (260€)','Bono 10 ses. (250€)','Bono 5 ses. (150€)','1ª Consulta/Valoración','Sesión individual (32€)','Sesión individual (26€)','Sesión individual (25€)'];
+const EP_PRICES=[350,140,280,270,260,250,150,40,32,26,25];
+const EP_COLORS=['#35d4f1','#35a8d4','#9b5cf6','#7b4ee0','#5b3dab','#3d2980','#c8f135','#f18135','#35f1b8','#f1d435','#f1357a'];
+const IND_LABELS=['Tipo A (50€)','Tipo B (40€)','Tipo C (35€)','Tipo D (30€)','Tipo E (26€)','Tipo F (25€)','Tipo G (20€)','Tipo H (15€)','Otras'];
+const IND_PRICES=[50,40,35,30,26,25,20,15,0];
+const IND_COLORS=['#9b5cf6','#7b4ee0','#5b3dab','#3d2980','#2a6ab5','#2a9aa0','#1c7240','#35f1b8','#c8f135'];
+const BON_LABELS=['Bono Readaptación','Bono ×10 (290€)','Bono ×10 (280€)','Bono ×10 (270€)','Bono ×5 (175€)','Bono ×5 (155€)','Bono ×5 (150€)','Bono SIS (150€)'];
+const BON_PRICES=[320,290,280,270,175,155,150,150];
+const BON_COLORS=['#c8f135','#35d4f1','#35a8d4','#35a0d4','#f18135','#e07030','#c06020','#9b5cf6'];
+
+// ═══ RENTABILIDAD FISIOS ═══
+function calcFisioExtra(key, facturacion, horasExtra){
+  if(key==='greg'){
+    // Bloques a partir de 3400€
+    let extra=0, rest=Math.max(0,facturacion-3400);
+    if(rest<=0)return 0;
+    const b1=Math.min(rest,500);extra+=b1*0.5;rest-=b1;
+    if(rest<=0)return extra;
+    const b2=Math.min(rest,500);extra+=b2*0.4;rest-=b2;
+    while(rest>0){const b=Math.min(rest,500);extra+=b*0.3;rest-=b;}
+    return Math.round(extra);
+  }
+  if(key==='acam'){
+    // Bloques a partir de 2300€
+    let extra=0, rest=Math.max(0,facturacion-2300);
+    if(rest<=0)return 0;
+    const b1=Math.min(rest,500);extra+=b1*0.5;rest-=b1;
+    if(rest<=0)return extra;
+    const b2=Math.min(rest,500);extra+=b2*0.4;rest-=b2;
+    while(rest>0){const b=Math.min(rest,500);extra+=b*0.3;rest-=b;}
+    return Math.round(extra);
+  }
+  if(key==='andr'){
+    // 12€/hora extra
+    return Math.round((horasExtra||0)*12);
+  }
+  if(key==='fsal'){
+    // Fran: nómina 3000€ base, extras a definir — por ahora solo nómina
+    return 0;
+  }
+  return 0;
+}
+
+// ═══ DATA FACTORIES ═══
+function emptyPro(){return{ind:IND_PRICES.map(()=>0),bon:BON_PRICES.map(()=>0),indOtrasP:0,facturaClinic:0,efectivo:0};}
+function emptyFisio(){return FPRO_KEYS.reduce((o,k)=>{o[k]=emptyPro();return o;},{});}
+function emptyEp(){return TRAINERS.reduce((o,t)=>{o[t]=EP_PRICES.map(()=>0);return o;},{});}
+function emptyTrainerCost(){return TRAINERS.reduce((o,t)=>{o[t]={nomina:0,extra:0,horasGrupo:0};return o;},{});}
+function emptyTrainerClinic(){return TRAINERS.reduce((o,t)=>{o[t]={facturaClinic:0,efectivo:0};return o;},{});}
+function trainerClinicOf(m,t){return (m.trainerClinic&&m.trainerClinic[t])||{facturaClinic:0,efectivo:0};}
+function emptyFisioCost(){return FPRO_KEYS.reduce((o,k)=>{o[k]={nomina:k==='fsal'?3000:0,horasExtra:0,extraManual:0};return o;},{});}
+
+function emptyM(){
+  return{
+    d1:0,d1p:22,d2:0,d2p:32,d3:0,d3p:40,d4:0,d4p:46,d5:0,d5p:50,
+    senior:0,seniorp:28,
+    corredores:0,corredoresp:40,corrAltas:0,corrBajas:0,
+    altasN:0,altasA:0,
+    bajasLes:0,bajasTra:0,bajasRes:0,bajasNc:0,
+    yoyUsr:0,
+    epAltasN:0,epAltasA:0,epBajas:0,epYoy:0,
+    ep:emptyEp(),diaslab:20,
+    fisio:emptyFisio(),
+    nc:0,ni:0,ncNota:'',pp:0,pi:0,ppNota:'',
+    pfbN:0,pfbI:0,pfbNota:'',
+    colaboradores:[],
+    nom:0,alq:3200,sum:0,mkt:0,man:0,matf:0,mate:0,otr:0,imp:0,fin:0,deu:0,
+    gastosCustom:[],
+    grupoNoOficial:0,
+    trainerCost:emptyTrainerCost(),
+    trainerClinic:emptyTrainerClinic(),
+    fisioCost:emptyFisioCost(),
+  };
+}
+
+// ═══ SEED DATA ═══
+// Enero 2026
+const ENE26=emptyM();
+Object.assign(ENE26,{
+  d1:35,d1p:22,d2:126,d2p:32,d3:35,d3p:40,d4:1,d4p:46,d5:0,d5p:50,
+  senior:16,seniorp:28,corredores:0,corredoresp:40,
+  altasN:9,altasA:17,bajasLes:0,bajasTra:0,bajasRes:0,bajasNc:15,
+  yoyUsr:218,epYoy:276,diaslab:20,
+  ep:{
+    Manolo:[0,0,0,0,0,0,0,0,18,0,0],Juanmi:[0,0,0,0,0,0,0,0,21,0,0],
+    Ruiz:[0,0,0,0,0,0,0,0,60,0,0],Zaragoza:[0,0,0,0,0,0,0,0,43,0,0],
+    Miguel:[0,0,0,0,0,0,0,0,42,0,0],Javi:[0,0,0,0,0,0,0,0,37,0,0],
+    Morata:[0,0,0,0,0,0,0,0,34,0,0],Luis:[0,0,0,0,0,0,0,0,21,0,0]
+  },
+  fisio:{
+    fsal:{ind:[3,2,1,0,0,0,0,0,0],bon:[1,1,0,0,1,0,1,0],indOtrasP:0},
+    greg:{ind:[2,1,0,1,0,0,0,0,0],bon:[0,1,1,0,1,0,0,0],indOtrasP:0},
+    acam:{ind:[1,1,1,0,0,0,0,0,0],bon:[0,0,0,0,0,1,0,0],indOtrasP:0},
+    andr:{ind:[0,2,0,0,0,0,0,0,0],bon:[0,0,0,0,0,0,0,0],indOtrasP:0}
+  },
+  nom:8500,alq:3200,sum:1200,mkt:850,man:450,mate:320,otr:800,
+});
+
+// Febrero 2026 — datos del PDF
+const FEB26=emptyM();
+Object.assign(FEB26,{
+  d1:36,d1p:22,d2:122,d2p:32,d3:42,d3p:40,d4:3,d4p:46,d5:0,d5p:50,
+  senior:17,seniorp:28,corredores:0,corredoresp:40,
+  altasN:13,altasA:7,bajasLes:1,bajasTra:2,bajasRes:0,bajasNc:11,
+  yoyUsr:220,epYoy:288,diaslab:20,
+  ep:{
+    Manolo:[0,0,0,0,0,0,0,0,18,0,0],Juanmi:[0,0,0,0,0,0,0,0,25,0,0],
+    Ruiz:[0,0,0,0,0,0,0,0,59,0,0],Zaragoza:[0,0,0,0,0,0,0,0,43,0,0],
+    Miguel:[0,0,0,0,0,0,0,0,43,0,0],Javi:[0,0,0,0,0,0,0,0,27,0,0],
+    Morata:[0,0,0,0,0,0,0,0,62,0,0],Luis:[0,0,0,0,0,0,0,0,11,0,0]
+  },
+  fisio:{
+    fsal:{ind:[3,2,1,0,0,0,0,0,0],bon:[1,1,0,0,1,0,1,0],indOtrasP:0},
+    greg:{ind:[2,1,0,1,0,0,0,0,0],bon:[0,1,1,0,1,0,0,0],indOtrasP:0},
+    acam:{ind:[1,1,1,0,0,0,0,0,0],bon:[0,0,0,0,0,1,0,0],indOtrasP:0},
+    andr:{ind:[0,2,0,0,0,0,0,0,0],bon:[0,0,0,0,0,0,0,0],indOtrasP:0}
+  },
+  nom:8500,alq:3200,sum:1200,mkt:850,man:450,mate:320,otr:800,
+});
+
+// ═══ LOAD DATA ═══
+let saved;try{saved=JSON.parse(localStorage.getItem(KEY));}catch(e){}
+let data;
+if(saved?.months&&saved.months.length===12){
+  data=saved.months;
+}else{
+  data=[ENE26,FEB26,...Array(10).fill(null).map(()=>emptyM())];
+}
+// Restore team (trainers / fisios) if previously customized
+if(saved?.team){
+  if(Array.isArray(saved.team.trainers)&&saved.team.trainers.length)TRAINERS=saved.team.trainers;
+  if(Array.isArray(saved.team.fpros)&&saved.team.fpros.length&&Array.isArray(saved.team.fproKeys)&&saved.team.fproKeys.length===saved.team.fpros.length){
+    FPROS=saved.team.fpros;FPRO_KEYS=saved.team.fproKeys;
+  }
+}
+// Ensure all months have new fields (schema migration + team backfill)
+function ensureTeamFields(){
+  data.forEach(m=>{
+    if(!m.corredores)m.corredores=0;
+    if(!m.corredoresp)m.corredoresp=40;
+    if(!m.corrAltas)m.corrAltas=0;
+    if(!m.corrBajas)m.corrBajas=0;
+    if(!m.bajasTra)m.bajasTra=0;
+    if(!m.bajasRes)m.bajasRes=0;
+    if(m.bajasNc===undefined)m.bajasNc=0;
+    if(!m.epAltasN)m.epAltasN=0;
+    if(!m.epAltasA)m.epAltasA=0;
+    if(!m.epBajas)m.epBajas=0;
+    if(!m.epYoy)m.epYoy=0;
+    if(m.grupoNoOficial===undefined)m.grupoNoOficial=0;
+    if(!m.gastosCustom)m.gastosCustom=[];
+    if(!m.trainerCost)m.trainerCost=emptyTrainerCost();
+    if(!m.trainerClinic)m.trainerClinic=emptyTrainerClinic();
+    TRAINERS.forEach(t=>{
+      if(!m.trainerCost[t])m.trainerCost[t]={nomina:0,extra:0,horasGrupo:0};
+      if(!m.trainerClinic[t])m.trainerClinic[t]={facturaClinic:0,efectivo:0};
+      if(!m.ep[t])m.ep[t]=EP_PRICES.map(()=>0);
+      // rename Antonio -> Javi
+      if(m.ep['Antonio']&&!m.ep['Javi']){m.ep['Javi']=m.ep['Antonio'];delete m.ep['Antonio'];}
+      if(m.trainerCost['Antonio']&&!m.trainerCost['Javi']){m.trainerCost['Javi']=m.trainerCost['Antonio'];delete m.trainerCost['Antonio'];}
+    });
+    if(!m.fisioCost)m.fisioCost=emptyFisioCost();
+    FPRO_KEYS.forEach(k=>{
+      if(!m.fisioCost[k])m.fisioCost[k]={nomina:k==='fsal'?3000:0,horasExtra:0,extraManual:0};
+      if(m.fisioCost[k].extraManual===undefined)m.fisioCost[k].extraManual=0;
+      if(!m.fisio[k])m.fisio[k]=emptyPro();
+      if(m.fisio[k].facturaClinic===undefined)m.fisio[k].facturaClinic=0;
+      if(m.fisio[k].efectivo===undefined)m.fisio[k].efectivo=0;
+    });
+    // Migrate old "Otros colaboradores" single fields into the new list
+    if(!m.colaboradores)m.colaboradores=[];
+    if(!m.colaboradores.length&&(m.cotrI||m.cotrN)){
+      m.colaboradores=[{nombre:m.cotrNota||'Otros colaboradores',cantidad:m.cotrI||0}];
+    }
+  });
+}
+ensureTeamFields();
+
+let curM=0,curFisioPro=0,curFisioType='ind',curEpPro=0,curInpPro=0,curInpEp=0;
+
+// ═══ HELPERS ═══
+const fmt=n=>'€'+Math.abs(Math.round(n)).toLocaleString('es-ES');
+const fmtR=n=>(n>=0?'+':'-')+'€'+Math.abs(Math.round(n)).toLocaleString('es-ES');
+const co=(hex,a)=>{const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return`rgba(${r},${g},${b},${a})`;};
+const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+const tip={callbacks:{label:ctx=>' '+ctx.dataset.label+': '+fmt(ctx.parsed.y)}};
+const xA={ticks:{color:'#7a7a90',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}};
+const yA={ticks:{color:'#7a7a90',callback:v=>'€'+v.toLocaleString('es-ES')},grid:{color:'rgba(255,255,255,.04)'}};
+const yAn={ticks:{color:'#7a7a90'},grid:{color:'rgba(255,255,255,.04)'}};
+
+function epProBreakdown(epData,clinic){
+  const svcs=EP_LABELS.map((lbl,i)=>({label:lbl,u:epData[i]||0,p:EP_PRICES[i],color:EP_COLORS[i]}));
+  const sesIng=svcs.reduce((s,x)=>s+x.u*x.p,0);
+  const units=svcs.reduce((s,x)=>s+x.u,0);
+  const facturaClinic=(clinic&&clinic.facturaClinic)||0;
+  const efectivo=(clinic&&clinic.efectivo)||0;
+  return{svcs,sesIng,units,facturaClinic,efectivo,ing:sesIng+facturaClinic+efectivo};
+}
+function epTotal(m){
+  const merged=EP_PRICES.map(()=>0);
+  let facturaClinic=0,efectivo=0;
+  TRAINERS.forEach(t=>{
+    (m.ep[t]||[]).forEach((v,i)=>merged[i]+=v);
+    const tc=trainerClinicOf(m,t);
+    facturaClinic+=(tc.facturaClinic||0);efectivo+=(tc.efectivo||0);
+  });
+  return epProBreakdown(merged,{facturaClinic,efectivo});
+}
+function proBreakdown(proData){
+  const inds=proData.ind.map((u,i)=>{const isOtras=i===IND_LABELS.length-1;const p=isOtras?(proData.indOtrasP||0):IND_PRICES[i];return{label:IND_LABELS[i],u,p,color:IND_COLORS[i]};});
+  const bons=proData.bon.map((u,i)=>({label:BON_LABELS[i],u,p:BON_PRICES[i],color:BON_COLORS[i]}));
+  const indIng=inds.reduce((s,x)=>s+x.u*x.p,0);
+  const bonIng=bons.reduce((s,x)=>s+x.u*x.p,0);
+  const indSes=inds.reduce((s,x)=>s+x.u,0);
+  const bonN=bons.reduce((s,x)=>s+x.u,0);
+  const facturaClinic=proData.facturaClinic||0;
+  const efectivo=proData.efectivo||0;
+  return{inds,bons,indIng,bonIng,indSes,bonN,facturaClinic,efectivo,total:indIng+bonIng+facturaClinic+efectivo};
+}
+function fisioTotal(m){
+  const merged={ind:IND_PRICES.map(()=>0),bon:BON_PRICES.map(()=>0),indOtrasP:0,facturaClinic:0,efectivo:0};
+  FPRO_KEYS.forEach(k=>{const p=m.fisio[k]||emptyPro();p.ind.forEach((v,i)=>merged.ind[i]+=v);p.bon.forEach((v,i)=>merged.bon[i]+=v);merged.facturaClinic+=(p.facturaClinic||0);merged.efectivo+=(p.efectivo||0);});
+  return proBreakdown(merged);
+}
+
+// ═══ VISTA ANUAL (agrega los 12 meses reales en un mes sintético de solo lectura) ═══
+const ANUAL_IDX=12;
+function isAnual(idx){return idx===ANUAL_IDX;}
+function monthObj(idx){return isAnual(idx)?buildAnnualMonth():data[idx];}
+function prevMonthObj(idx){return(idx>0&&idx<ANUAL_IDX)?data[idx-1]:null;}
+function buildAnnualMonth(){
+  const m=emptyM();
+  m.alq=0;m.diaslab=0;FPRO_KEYS.forEach(k=>{if(m.fisioCost[k])m.fisioCost[k].nomina=0;});
+  // Snapshot (stock): usuarios/precios actuales -> del último mes con actividad real
+  let snap=data[0];
+  for(let i=data.length-1;i>=0;i--){const mo=data[i];if((mo.d1||mo.d2||mo.d3||mo.d4||mo.d5||mo.senior||mo.corredores)){snap=mo;break;}}
+  ['d1','d1p','d2','d2p','d3','d3p','d4','d4p','d5','d5p','senior','seniorp','corredores','corredoresp','deu','yoyUsr','epYoy','nc','pp','pfbN','ncNota','ppNota','pfbNota'].forEach(k=>{m[k]=snap[k];});
+  // Flujos (suma anual)
+  const lastIdx=IND_LABELS.length-1;
+  let otrasRev={},otrasCnt={};
+  FPRO_KEYS.forEach(k=>{otrasRev[k]=0;otrasCnt[k]=0;});
+  data.forEach(mo=>{
+    m.corrAltas+=mo.corrAltas||0;m.corrBajas+=mo.corrBajas||0;
+    m.altasN+=mo.altasN||0;m.altasA+=mo.altasA||0;
+    m.bajasLes+=mo.bajasLes||0;m.bajasTra+=mo.bajasTra||0;m.bajasRes+=mo.bajasRes||0;m.bajasNc+=mo.bajasNc||0;
+    m.epAltasN+=mo.epAltasN||0;m.epAltasA+=mo.epAltasA||0;m.epBajas+=mo.epBajas||0;
+    m.diaslab+=mo.diaslab||0;
+    m.ni+=mo.ni||0;m.pi+=mo.pi||0;m.pfbI+=mo.pfbI||0;
+    m.nom+=mo.nom||0;m.alq+=mo.alq||0;m.sum+=mo.sum||0;m.mkt+=mo.mkt||0;m.man+=mo.man||0;
+    m.matf+=mo.matf||0;m.mate+=mo.mate||0;m.otr+=mo.otr||0;m.imp+=mo.imp||0;m.fin+=mo.fin||0;
+    m.grupoNoOficial+=mo.grupoNoOficial||0;m.noIva=(m.noIva||0)+(mo.noIva||0);
+    TRAINERS.forEach(t=>{
+      if(!m.ep[t])m.ep[t]=EP_PRICES.map(()=>0);
+      (mo.ep[t]||[]).forEach((v,i)=>{m.ep[t][i]=(m.ep[t][i]||0)+(v||0);});
+      const tc=mo.trainerCost&&mo.trainerCost[t]||{nomina:0,extra:0,horasGrupo:0};
+      if(!m.trainerCost[t])m.trainerCost[t]={nomina:0,extra:0,horasGrupo:0};
+      m.trainerCost[t].nomina+=tc.nomina||0;m.trainerCost[t].extra+=tc.extra||0;m.trainerCost[t].horasGrupo+=tc.horasGrupo||0;
+      const tcl=mo.trainerClinic&&mo.trainerClinic[t]||{facturaClinic:0,efectivo:0};
+      if(!m.trainerClinic[t])m.trainerClinic[t]={facturaClinic:0,efectivo:0};
+      m.trainerClinic[t].facturaClinic+=tcl.facturaClinic||0;m.trainerClinic[t].efectivo+=tcl.efectivo||0;
+    });
+    FPRO_KEYS.forEach(k=>{
+      const pd=mo.fisio&&mo.fisio[k]||emptyPro();
+      if(!m.fisio[k])m.fisio[k]=emptyPro();
+      pd.ind.forEach((v,i)=>{m.fisio[k].ind[i]=(m.fisio[k].ind[i]||0)+(v||0);});
+      pd.bon.forEach((v,i)=>{m.fisio[k].bon[i]=(m.fisio[k].bon[i]||0)+(v||0);});
+      m.fisio[k].facturaClinic=(m.fisio[k].facturaClinic||0)+(pd.facturaClinic||0);
+      m.fisio[k].efectivo=(m.fisio[k].efectivo||0)+(pd.efectivo||0);
+      otrasCnt[k]+=pd.ind[lastIdx]||0;
+      otrasRev[k]+=(pd.ind[lastIdx]||0)*(pd.indOtrasP||0);
+      const fc=mo.fisioCost&&mo.fisioCost[k]||{nomina:0,horasExtra:0,extraManual:0};
+      if(!m.fisioCost[k])m.fisioCost[k]={nomina:0,horasExtra:0,extraManual:0};
+      m.fisioCost[k].nomina+=fc.nomina||0;m.fisioCost[k].horasExtra+=fc.horasExtra||0;m.fisioCost[k].extraManual+=fc.extraManual||0;
+    });
+    (mo.colaboradores||[]).forEach(c=>{
+      let ex=m.colaboradores.find(x=>x.nombre===c.nombre);
+      if(!ex){ex={nombre:c.nombre,cantidad:0};m.colaboradores.push(ex);}
+      ex.cantidad+=c.cantidad||0;
+    });
+    (mo.gastosCustom||[]).forEach(g=>{
+      let ex=m.gastosCustom.find(x=>x.nombre===g.nombre);
+      if(!ex){ex={nombre:g.nombre,cantidad:0,imported:g.imported};m.gastosCustom.push(ex);}
+      ex.cantidad+=g.cantidad||0;
+    });
+  });
+  FPRO_KEYS.forEach(k=>{m.fisio[k].indOtrasP=otrasCnt[k]>0?otrasRev[k]/otrasCnt[k]:0;});
+  return m;
+}
+
+function derive(m){
+  const grupal=m.d1*m.d1p+m.d2*m.d2p+m.d3*m.d3p+m.d4*m.d4p+m.d5*m.d5p;
+  const seniorIng=m.senior*m.seniorp;
+  const corrIng=(m.corredores||0)*(m.corredoresp||40);
+  const totalGrupal=m.d1+m.d2+m.d3+m.d4+m.d5;
+  const totalUsers=totalGrupal+(m.senior||0)+(m.corredores||0);
+  const epT=epTotal(m);
+  const fb=fisioTotal(m);
+  const colaboradoresList=m.colaboradores||[];
+  const cotrTotal=colaboradoresList.reduce((s,c)=>s+(c.cantidad||0),0);
+  const colabIng=(m.ni||0)+(m.pi||0)+(m.pfbI||0)+cotrTotal;
+  const gastosCustomTotal=(m.gastosCustom||[]).reduce((s,g)=>s+(g.cantidad||0),0);
+  const totalIng=grupal+seniorIng+corrIng+epT.ing+fb.total+colabIng;
+  const gas=m.nom+m.alq+m.sum+m.mkt+m.man+(m.matf||0)+(m.mate||0)+m.otr+(m.imp||0)+(m.fin||0)+gastosCustomTotal;
+  const util=totalIng-gas;
+  const altas=(m.altasN||0)+(m.altasA||0);
+  const bajas=(m.bajasLes||0)+(m.bajasTra||0)+(m.bajasRes||0)+(m.bajasNc||0);
+  const ret=totalGrupal>0?((totalGrupal-bajas)/totalGrupal*100):0;
+  // Horas totales grupo del mes
+  const totalHorasGrupo=TRAINERS.reduce((s,t)=>s+(m.trainerCost[t]?.horasGrupo||0),0);
+  // Ingreso grupal oficial (calculado por cuotas) + no oficial (efectivo manual)
+  const ingGrupalOficial=grupal+seniorIng+corrIng;
+  const ingGrupalNoOficial=m.grupoNoOficial||0;
+  const ingGrupalCombinado=ingGrupalOficial+ingGrupalNoOficial;
+  return{grupal,seniorIng,corrIng,totalGrupal,totalUsers,epSes:epT.units,epIng:epT.ing,epT,fisioIng:fb.total,fb,colabIng,cotrTotal,gastosCustomTotal,totalIng,gas,util,altas,bajas,ret,totalHorasGrupo,ingGrupalOficial,ingGrupalNoOficial,ingGrupalCombinado};
+}
+
+// ═══ CHARTS ═══
+const mkChart=(id,type,data,options)=>new Chart(document.getElementById(id),{type,data,options});
+
+const usersChart=mkChart('usersChart','line',{labels:MN,datasets:[
+  {label:'Total',data:[],borderColor:'#c8f135',backgroundColor:co('#c8f135',.08),fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#c8f135'},
+  {label:'General',data:[],borderColor:'#35d4f1',backgroundColor:'transparent',tension:.4,pointRadius:3,pointBackgroundColor:'#35d4f1'},
+  {label:'Senior',data:[],borderColor:'#f1d435',backgroundColor:'transparent',tension:.4,pointRadius:3,pointBackgroundColor:'#f1d435'},
+  {label:'Corredores',data:[],borderColor:'#35f1b8',backgroundColor:'transparent',tension:.4,pointRadius:3,pointBackgroundColor:'#35f1b8'},
+]},{responsive:true,interaction:{mode:'index'},plugins:{legend:{labels:{color:'#7a7a90',font:{size:10}}},tooltip:{callbacks:{label:ctx=>' '+ctx.dataset.label+': '+ctx.parsed.y}}},scales:{x:xA,y:yAn}});
+
+const altasChart=mkChart('altasChart','bar',{labels:MN,datasets:[
+  {label:'Altas nuevas',data:[],backgroundColor:co('#c8f135',.8),borderRadius:4},
+  {label:'Altas antiguas',data:[],backgroundColor:co('#35d4f1',.8),borderRadius:4},
+  {label:'Bajas',data:[],backgroundColor:co('#f1357a',.8),borderRadius:4},
+]},{responsive:true,interaction:{mode:'index'},plugins:{legend:{labels:{color:'#7a7a90',font:{size:10}}},tooltip:{callbacks:{label:ctx=>' '+ctx.dataset.label+': '+ctx.parsed.y}}},scales:{x:xA,y:yAn}});
+
+const distChart=mkChart('distChart','doughnut',{labels:['Grupal General','Senior','Corredores','EP','Fisio','Colaboradores'],datasets:[{data:[0,0,0,0,0,0],backgroundColor:['#c8f135','#f1d435','#35f1b8','#35d4f1','#9b5cf6','#f18135'],borderColor:'#13141a',borderWidth:3}]},{cutout:'62%',plugins:{legend:{position:'bottom',labels:{color:'#7a7a90',padding:6,font:{size:10}}},tooltip:tip}});
+
+const bajasMotivosChart=mkChart('bajasMotivosChart','doughnut',{labels:['Lesión','Trabajo','Cambio residencia','No sabemos'],datasets:[{data:[0,0,0,0],backgroundColor:['#f1357a','#f18135','#35d4f1','#7a7a90'],borderColor:'#13141a',borderWidth:3}]},{cutout:'60%',plugins:{legend:{position:'bottom',labels:{color:'#7a7a90',padding:8,font:{size:11}}},tooltip:{callbacks:{label:ctx=>' '+ctx.label+': '+ctx.parsed+' bajas'}}}});
+
+const bajasEvolChart=mkChart('bajasEvolChart','bar',{labels:MN,datasets:[
+  {label:'Lesión',data:[],backgroundColor:co('#f1357a',.85),borderRadius:3,stack:'b'},
+  {label:'Trabajo',data:[],backgroundColor:co('#f18135',.85),borderRadius:3,stack:'b'},
+  {label:'Cambio residencia',data:[],backgroundColor:co('#35d4f1',.85),borderRadius:3,stack:'b'},
+  {label:'No sabemos',data:[],backgroundColor:co('#7a7a90',.7),borderRadius:3,stack:'b'},
+]},{responsive:true,interaction:{mode:'index'},plugins:{legend:{labels:{color:'#7a7a90',font:{size:9}}},tooltip:{callbacks:{label:ctx=>' '+ctx.dataset.label+': '+ctx.parsed.y}}},scales:{x:xA,y:yAn}});
+
+const grupalEvolChart=mkChart('grupalEvolChart','line',{labels:MN,datasets:[
+  {label:'General',data:[],borderColor:'#35d4f1',backgroundColor:co('#35d4f1',.07),fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#35d4f1'},
+  {label:'Senior',data:[],borderColor:'#f1d435',backgroundColor:'transparent',tension:.4,pointRadius:3,pointBackgroundColor:'#f1d435'},
+  {label:'Corredores',data:[],borderColor:'#35f1b8',backgroundColor:'transparent',tension:.4,pointRadius:3,pointBackgroundColor:'#35f1b8'},
+]},{responsive:true,interaction:{mode:'index'},plugins:{legend:{labels:{color:'#7a7a90',font:{size:10}}},tooltip:{callbacks:{label:ctx=>' '+ctx.dataset.label+': '+ctx.parsed.y}}},scales:{x:xA,y:yAn}});
+
+const trainerChart=mkChart('trainerChart','bar',{labels:TRAINERS,datasets:[
+  {label:'Mes actual',data:[],backgroundColor:TRAINERS.map((_,i)=>co(colorAt(i),.85)),borderRadius:5,borderSkipped:false},
+  {label:'Mes anterior',data:[],backgroundColor:TRAINERS.map((_,i)=>co(colorAt(i),.3)),borderRadius:5,borderSkipped:false},
+]},{responsive:true,interaction:{mode:'index'},plugins:{legend:{labels:{color:'#7a7a90',font:{size:10}}},tooltip:tip},scales:{x:xA,y:yA}});
+
+const trainerDonut=mkChart('trainerDonut','doughnut',{labels:TRAINERS,datasets:[{data:TRAINERS.map(()=>0),backgroundColor:TRAINERS.map((_,i)=>colorAt(i)),borderColor:'#13141a',borderWidth:3}]},{cutout:'62%',plugins:{legend:{position:'bottom',labels:{color:'#7a7a90',padding:6,font:{size:10}}},tooltip:tip}});
+
+const epEvolChart=mkChart('epEvolChart','line',{labels:MN,datasets:[
+  {label:'Sesiones 2026',data:[],borderColor:'#35d4f1',backgroundColor:co('#35d4f1',.08),fill:true,tension:.4,pointBackgroundColor:'#35d4f1',pointRadius:4},
+  {label:'Sesiones año ant.',data:[],borderColor:'#7a7a90',backgroundColor:'transparent',borderDash:[5,4],tension:.4,pointBackgroundColor:'#7a7a90',pointRadius:3},
+]},{responsive:true,interaction:{mode:'index'},plugins:{legend:{labels:{color:'#7a7a90',font:{size:10}}},tooltip:{callbacks:{label:ctx=>' '+ctx.dataset.label+': '+ctx.parsed.y}}},scales:{x:xA,y:yAn}});
+
+const fisioProChart=mkChart('fisioProChart','bar',{labels:FPROS,datasets:[
+  {label:'Mes actual',data:[],backgroundColor:FPROS.map((_,i)=>co(colorAt(i),.85)),borderRadius:5,borderSkipped:false},
+  {label:'Mes anterior',data:[],backgroundColor:FPROS.map((_,i)=>co(colorAt(i),.3)),borderRadius:5,borderSkipped:false},
+]},{responsive:true,interaction:{mode:'index'},plugins:{legend:{labels:{color:'#7a7a90',font:{size:10}}},tooltip:{callbacks:{label:ctx=>' '+ctx.dataset.label+': '+ctx.parsed.y+' ses.'}}},scales:{x:xA,y:yAn}});
+
+const fisioProDonut=mkChart('fisioProDonut','doughnut',{labels:FPROS,datasets:[{data:FPROS.map(()=>0),backgroundColor:FPROS.map((_,i)=>colorAt(i)),borderColor:'#13141a',borderWidth:3}]},{cutout:'62%',plugins:{legend:{position:'bottom',labels:{color:'#7a7a90',padding:6,font:{size:10}}},tooltip:tip}});
+
+const fisioDonut=mkChart('fisioDonut','doughnut',{labels:['Individuales','Bonos','Clinic Cloud + Efectivo'],datasets:[{data:[0,0,0],backgroundColor:['#9b5cf6','#35d4f1','#f1d435'],borderColor:'#13141a',borderWidth:3}]},{cutout:'64%',plugins:{legend:{position:'bottom',labels:{color:'#7a7a90',padding:8,font:{size:11}}},tooltip:tip}});
+
+const fisioEvolChart=mkChart('fisioEvolChart','bar',{labels:MN,datasets:[
+  {label:'Individuales',data:[],backgroundColor:co('#9b5cf6',.8),stack:'f'},
+  {label:'Bonos',data:[],backgroundColor:co('#35d4f1',.8),stack:'f'},
+  {label:'Clinic Cloud + Efectivo',data:[],backgroundColor:co('#f1d435',.8),stack:'f'},
+]},{responsive:true,interaction:{mode:'index'},plugins:{legend:{labels:{color:'#7a7a90',font:{size:10}}},tooltip:tip},scales:{x:xA,y:yA}});
+
+const saludEvolChart=mkChart('saludEvolChart','bar',{labels:MN,datasets:[
+  {label:'Nutrición',data:[],backgroundColor:co('#f18135',.8),stack:'c'},
+  {label:'Psicología',data:[],backgroundColor:co('#35f1b8',.8),stack:'c'},
+  {label:'ProfutbolBase',data:[],backgroundColor:co('#35d4f1',.8),stack:'c'},
+  {label:'Otros',data:[],backgroundColor:co('#f1d435',.6),stack:'c'},
+]},{responsive:true,interaction:{mode:'index'},plugins:{legend:{labels:{color:'#7a7a90',font:{size:10}}},tooltip:tip},scales:{x:xA,y:yA}});
+
+const gastoDonut=mkChart('gastoDonut','doughnut',{labels:['Nóminas','Alquiler','Suministros','Marketing','Mant.','Mat.Fisio','Mat.Entreno','Otros','Impuestos','Financieros','Personalizados'],datasets:[{data:[0,0,0,0,0,0,0,0,0,0,0],backgroundColor:Object.values(GC),borderColor:'#13141a',borderWidth:3}]},{cutout:'60%',plugins:{legend:{position:'bottom',labels:{color:'#7a7a90',padding:5,font:{size:9}}},tooltip:tip}});
+
+const gastoStack=mkChart('gastoStack','bar',{labels:MN,datasets:[
+  {label:'Nóminas',data:[],backgroundColor:co('#f1357a',.8),stack:'g'},
+  {label:'Alquiler',data:[],backgroundColor:co('#f18135',.8),stack:'g'},
+  {label:'Suministros',data:[],backgroundColor:co('#35d4f1',.8),stack:'g'},
+  {label:'Marketing',data:[],backgroundColor:co('#c8f135',.8),stack:'g'},
+  {label:'Impuestos',data:[],backgroundColor:co('#ff6b6b',.8),stack:'g'},
+  {label:'Otros',data:[],backgroundColor:co('#7a7a90',.6),stack:'g'},
+]},{responsive:true,interaction:{mode:'index'},plugins:{legend:{labels:{color:'#7a7a90',font:{size:10}}},tooltip:tip},scales:{x:xA,y:yA}});
+
+const rentChart=mkChart('rentChart','bar',{labels:[],datasets:[
+  {label:'Facturado',data:[],backgroundColor:co('#c8f135',.75),borderRadius:5,borderSkipped:false},
+  {label:'Coste total',data:[],backgroundColor:co('#f1357a',.7),borderRadius:5,borderSkipped:false},
+]},{responsive:true,interaction:{mode:'index'},plugins:{legend:{labels:{color:'#7a7a90',font:{size:10}}},tooltip:tip},scales:{x:xA,y:yA}});
+
+const rentDonut=mkChart('rentDonut','doughnut',{labels:[],datasets:[{data:[],backgroundColor:[],borderColor:'#13141a',borderWidth:3}]},{cutout:'60%',plugins:{legend:{position:'bottom',labels:{color:'#7a7a90',padding:4,font:{size:9}}},tooltip:tip}});
+
+const projChart=mkChart('projChart','line',{labels:MN,datasets:[
+  {label:'Real',data:[],borderColor:'#c8f135',backgroundColor:co('#c8f135',.07),fill:true,tension:.4,pointBackgroundColor:'#c8f135',pointRadius:4},
+  {label:'Proyección',data:[],borderColor:'#35d4f1',backgroundColor:'transparent',borderDash:[6,4],tension:.4,pointBackgroundColor:'#35d4f1',pointRadius:3},
+]},{responsive:true,plugins:{legend:{labels:{color:'#7a7a90',font:{size:10}}},tooltip:{callbacks:{label:ctx=>' '+ctx.dataset.label+': '+ctx.parsed.y}}},scales:{x:xA,y:yAn}});
+
+// ═══ RENDER ═══
+function renderAll(){
+  const m=monthObj(curM);
+  const pm=prevMonthObj(curM);
+  const d=derive(m);
+  const prev=pm?derive(pm):null;
+  const allD=data.map(derive);
+
+  // ── RESUMEN ──
+  const totalU=d.totalUsers;
+  set('r-total',''+totalU);
+  if(prev){const dt=totalU-(prev.totalUsers);document.getElementById('r-d-total').textContent=(dt>=0?'+':'')+dt;document.getElementById('r-d-total').className=dt>=0?'up':'dn';}
+  set('r-grupal',''+d.totalGrupal);document.getElementById('r-grupal-d').textContent=fmt(d.grupal);
+  set('r-senior',''+m.senior);document.getElementById('r-senior-d').textContent=fmt(d.seniorIng);
+  set('r-corredores',''+(m.corredores||0));document.getElementById('r-corredores-d').textContent=fmt(d.corrIng);
+  set('r-altas',''+(d.altas+(m.corrAltas||0)));set('r-bajas',''+(d.bajas+(m.corrBajas||0)));
+  if(prev){const db=d.bajas-prev.bajas;document.getElementById('r-d-bajas').textContent=(db>=0?'+':'')+db;document.getElementById('r-d-bajas').className=db>=0?'dn':'up';}
+  set('r-ing',fmt(d.totalIng));if(prev){const di=d.totalIng-prev.totalIng;document.getElementById('r-ing-d').textContent=(di>=0?'+':'')+fmt(Math.abs(di));document.getElementById('r-ing-d').className=di>=0?'up':'dn';}
+  set('r-gas',fmt(d.gas));
+  set('r-util',fmt(d.util));document.getElementById('r-util').style.color=d.util>=0?'var(--teal)':'var(--pink)';
+
+  // ── GRUPAL ──
+  set('g-total',''+totalU);set('g-ing',fmt(d.grupal+d.seniorIng+d.corrIng));
+  set('g-altas',''+(d.altas+(m.corrAltas||0)));set('g-bajas',''+(d.bajas+(m.corrBajas||0)));
+  set('g-ret',d.ret.toFixed(1)+'%');
+  set('gb-general',''+d.totalGrupal);set('gb-general-ing',fmt(d.grupal));
+  set('gb-senior',''+(m.senior||0));set('gb-senior-ing',fmt(d.seniorIng));
+  set('gb-senior-precio',fmt(m.seniorp||28)+'/mes');
+  set('gb-corredores',''+(m.corredores||0));set('gb-corredores-ing',fmt(d.corrIng));
+  // Freq boxes
+  const freqs=[{d:1,u:m.d1,p:m.d1p},{d:2,u:m.d2,p:m.d2p},{d:3,u:m.d3,p:m.d3p},{d:4,u:m.d4,p:m.d4p},{d:5,u:m.d5,p:m.d5p}];
+  const fColors=['#c8f135','#35d4f1','#9b5cf6','#f18135','#35f1b8'];
+  document.getElementById('freqBoxes').innerHTML=freqs.map((f,i)=>`
+    <div class="freq-box" style="border-top:2px solid ${fColors[i]}">
+      <div class="freq-label">días/semana</div><div class="freq-days">${f.d}</div>
+      <div class="freq-users">${f.u}</div><div class="freq-ing">${fmt(f.u*f.p)}/mes</div>
+    </div>`).join('');
+  // freq table
+  const totalG=d.grupal+d.seniorIng;
+  document.getElementById('freqTable').innerHTML=freqs.map((f,i)=>{
+    const p=totalG?(f.u*f.p/totalG*100).toFixed(1):0;
+    return`<tr><td>${f.d} día${f.d>1?'s':''}/semana</td><td>${f.u}</td><td>${fmt(f.p)}</td><td>${fmt(f.u*f.p)}</td><td><div>${p}%</div><div class="mb"><div class="mf" style="background:${fColors[i]};width:${p}%"></div></div></td></tr>`;
+  }).concat([
+    `<tr class="total-row"><td>Senior</td><td>${m.senior}</td><td>${fmt(m.seniorp)}</td><td>${fmt(d.seniorIng)}</td><td>—</td></tr>`,
+    `<tr class="total-row"><td>Corredores</td><td>${m.corredores||0}</td><td>${fmt(m.corredoresp||40)}</td><td>${fmt(d.corrIng)}</td><td>—</td></tr>`,
+    `<tr class="total-row"><td>TOTAL</td><td>${totalU}</td><td>—</td><td>${fmt(d.grupal+d.seniorIng+d.corrIng)}</td><td>100%</td></tr>`
+  ]).join('');
+  // Bajas desglose
+  const bajasMotivos=[
+    {label:'Lesión',color:'#f1357a',v:m.bajasLes||0},
+    {label:'Trabajo',color:'#f18135',v:m.bajasTra||0},
+    {label:'Cambio residencia',color:'#35d4f1',v:m.bajasRes||0},
+    {label:'No sabemos',color:'#7a7a90',v:m.bajasNc||0},
+  ];
+  document.getElementById('bajasDesglose').innerHTML=bajasMotivos.map(b=>`
+    <div class="baja-motivo-row">
+      <div class="baja-motivo-label"><span class="dot" style="background:${b.color}"></span>${b.label}</div>
+      <div class="baja-motivo-val" style="color:${b.color}">${b.v}</div>
+    </div>`).join('')+`<div class="baja-motivo-row" style="border-top:1px solid var(--border);margin-top:4px">
+      <div class="baja-motivo-label" style="color:var(--text);font-weight:600">Total bajas</div>
+      <div class="baja-motivo-val" style="color:var(--pink)">${d.bajas}</div>
+    </div>`;
+
+  // ── EP ──
+  const epT=epTotal(m);
+  set('ep-total',fmt(epT.ing));
+  if(prev){const de=epT.ing-prev.epIng;document.getElementById('ep-d-total').textContent=(de>=0?'+':'')+fmt(Math.abs(de));document.getElementById('ep-d-total').className=de>=0?'up':'dn';}
+  set('ep-ses',''+epT.units);
+  const sxd=m.diaslab>0?(epT.units/m.diaslab).toFixed(1):'—';
+  set('ep-sxd',sxd);set('ep-dias-lbl',m.diaslab+' días lab.');
+  set('ep-altas',''+(m.epAltasN||0)+(m.epAltasA||0>0?' ('+m.epAltasA+' ant.)':''));
+  set('ep-bajas',''+(m.epBajas||0));
+  set('ep-yoy',''+(m.epYoy||0));
+  set('ep-dias',''+m.diaslab);
+  const topIdx=TRAINERS.reduce((best,t,i)=>{const pb=epProBreakdown(m.ep[t]||[],trainerClinicOf(m,t));return pb.ing>epProBreakdown(m.ep[TRAINERS[best]]||[],trainerClinicOf(m,TRAINERS[best])).ing?i:best;},0);
+  set('ep-top',TRAINERS[topIdx]);
+  renderEpPro(m,epT);
+  // EP rank table
+  const prevEp=pm?pm.ep:null;
+  document.getElementById('ep-rank-table').innerHTML=TRAINERS.map((t,i)=>{
+    const pb=epProBreakdown(m.ep[t]||[],trainerClinicOf(m,t));
+    const prevPb=prevEp?epProBreakdown(prevEp[t]||[],pm?trainerClinicOf(pm,t):undefined):null;
+    const diff=prevPb?pb.ing-prevPb.ing:null;
+    const sxd=m.diaslab>0?(pb.units/m.diaslab).toFixed(1):'—';
+    const isTop=pb.ing===Math.max(...TRAINERS.map(tr=>epProBreakdown(m.ep[tr]||[],trainerClinicOf(m,tr)).ing))&&pb.ing>0;
+    return`<tr style="${isTop?'background:rgba(53,212,241,.07);border-left:2px solid #35d4f1':''}">
+      <td><span class="dot" style="background:${colorAt(i)}"></span>${t}</td>
+      <td>${pb.units}</td><td style="color:var(--muted)">${sxd}</td>
+      <td style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:${colorAt(i)}">${fmt(pb.ing)}</td>
+      <td>${diff!==null?'<span class="'+(diff>=0?'up':'dn')+'">'+(diff>=0?'+':'')+fmt(diff)+'</span>':'—'}</td>
+    </tr>`;
+  }).join('');
+
+  // ── FISIO ──
+  const fb=fisioTotal(m);
+  set('sal-fis',fmt(fb.total));set('sal-fis-n',(fb.indSes+fb.bonN)+' sesiones');
+  set('sal-ind-tot',''+fb.indSes);set('sal-ind-ing',fmt(fb.indIng));
+  set('sal-bon-tot',''+fb.bonN);set('sal-bon-ing',fmt(fb.bonIng));
+  renderFisioPro(m,fb);
+  const prevFisio=pm?pm.fisio:null;
+  document.getElementById('fisioRankTable').innerHTML=FPROS.map((name,i)=>{
+    const pk=FPRO_KEYS[i];const pb=proBreakdown(m.fisio[pk]||emptyPro());
+    const prevPb=prevFisio?proBreakdown(prevFisio[pk]||emptyPro()):null;
+    const diff=prevPb?pb.indSes+pb.bonN-(prevPb.indSes+prevPb.bonN):null;
+    const isTop=pb.total===Math.max(...FPRO_KEYS.map(k=>proBreakdown(m.fisio[k]||emptyPro()).total))&&pb.total>0;
+    return`<tr style="${isTop?'background:rgba(155,92,246,.07);border-left:2px solid #9b5cf6':''}">
+      <td><span class="dot" style="background:${colorAt(i)}"></span>${name}</td>
+      <td>${pb.indSes}</td><td>${pb.bonN}</td>
+      <td style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:${colorAt(i)}">${pb.indSes+pb.bonN}</td>
+      <td>${fmt(pb.total)}${diff!==null?' <span class="'+(diff>=0?'up':'dn')+'">'+(diff>=0?'+':'')+diff+'</span>':''}</td>
+    </tr>`;
+  }).join('');
+
+  // ── COLABORADORES ──
+  const colaboradoresList=m.colaboradores||[];
+  set('sal-nut',fmt(m.ni||0));set('sal-nut-n',(m.nc||0)+' clientes');
+  set('sal-psi',fmt(m.pi||0));set('sal-psi-n',(m.pp||0)+' pacientes');
+  set('col-pfb',fmt(m.pfbI||0));set('col-pfb-n',(m.pfbN||0)+' personas');
+  set('col-otr',fmt(d.cotrTotal));set('col-otr-n',colaboradoresList.length+' colaborador'+(colaboradoresList.length===1?'':'es'));
+  const colTot=(m.ni||0)+(m.pi||0)+(m.pfbI||0)+d.cotrTotal;
+  set('col-tot',fmt(colTot));
+  set('col-personas',((m.nc||0)+(m.pp||0)+(m.pfbN||0))+' personas + '+colaboradoresList.length+' colab.');
+  document.getElementById('saludTable').innerHTML=[
+    {n:'Nutrición',c:'#f18135',p:m.nc||0,i:m.ni||0,nota:m.ncNota||''},
+    {n:'Psicología',c:'#35f1b8',p:m.pp||0,i:m.pi||0,nota:m.ppNota||''},
+    {n:'ProfutbolBase',c:'#35d4f1',p:m.pfbN||0,i:m.pfbI||0,nota:m.pfbNota||''},
+    {n:'Otros colab.',c:'#f1d435',p:colaboradoresList.length,i:d.cotrTotal,nota:colaboradoresList.map(c=>c.nombre).join(', ')||''},
+  ].map(r=>`<tr><td><span class="dot" style="background:${r.c}"></span>${r.n}</td><td>${r.p}</td><td>${fmt(r.i)}</td><td>${r.p?fmt(r.i/r.p):'—'}</td><td style="color:var(--muted);font-size:11px">${r.nota||'—'}</td></tr>`).join('');
+  document.getElementById('colaboradoresDetailTable').innerHTML=colaboradoresList.length?colaboradoresList.map(c=>`<tr><td>${c.nombre}</td><td>${fmt(c.cantidad||0)}</td></tr>`).join('')+`<tr class="total-row"><td>TOTAL</td><td>${fmt(d.cotrTotal)}</td></tr>`:'<tr><td colspan="2" style="color:var(--muted)">Sin colaboradores añadidos. Edítalos desde "Ingresar datos".</td></tr>';
+
+  // ── GASTOS ──
+  const gas=d.gas;set('ga-tot',fmt(gas));
+  if(prev){const dg=gas-prev.gas;document.getElementById('ga-d-tot').textContent=(dg>=0?'+':'')+fmt(Math.abs(dg));document.getElementById('ga-d-tot').className=dg>=0?'dn':'up';}
+  const gcats=[{k:'nom',l:'Nóminas'},{k:'alq',l:'Alquiler'},{k:'sum',l:'Suministros'},{k:'mkt',l:'Marketing'},{k:'man',l:'Mant.'},{k:'matf',l:'Mat.Fisio'},{k:'mate',l:'Mat.Entreno'},{k:'otr',l:'Otros'},{k:'imp',l:'Impuestos'},{k:'fin',l:'G.Financieros'}];
+  gcats.forEach(c=>{set('ga-'+c.k,fmt(m[c.k]||0));const pEl=document.getElementById('ga-'+c.k+'-p');if(pEl)pEl.textContent=gas?(((m[c.k]||0)/gas*100).toFixed(1)+'% del total'):'—';});
+  set('ga-deu',fmt(m.deu||0));
+  set('ga-custom',fmt(d.gastosCustomTotal));
+  const gaCustomP=document.getElementById('ga-custom-p');if(gaCustomP)gaCustomP.textContent=gas?((d.gastosCustomTotal/gas*100).toFixed(1)+'% del total'):'—';
+  document.getElementById('gastosBars').innerHTML=gcats.map(c=>{const v=m[c.k]||0;const p=gas?(v/gas*100):0;const col=GC[c.k]||'#7a7a90';return`<div class="prog-row"><div class="prog-label">${c.l}</div><div class="prog-bar"><div class="prog-fill" style="background:${col};width:${p}%"></div></div><div class="prog-val" style="color:${col}">${p.toFixed(1)}%</div></div>`;}).join('')+(d.gastosCustomTotal>0?`<div class="prog-row"><div class="prog-label">Personalizados</div><div class="prog-bar"><div class="prog-fill" style="background:${GC.custom};width:${gas?(d.gastosCustomTotal/gas*100):0}%"></div></div><div class="prog-val" style="color:${GC.custom}">${gas?(d.gastosCustomTotal/gas*100).toFixed(1):0}%</div></div>`:'');
+  document.getElementById('gastosCustomTable').innerHTML=(m.gastosCustom&&m.gastosCustom.length)?m.gastosCustom.map(g=>`<tr><td>${g.nombre}</td><td>${fmt(g.cantidad||0)}</td></tr>`).join('')+`<tr class="total-row"><td>TOTAL</td><td>${fmt(d.gastosCustomTotal)}</td></tr>`:'<tr><td colspan="2" style="color:var(--muted)">Sin gastos personalizados este mes. Añádelos desde "Ingresar datos".</td></tr>';
+
+  // ── RENTABILIDAD ──
+  set('rent-neto',fmt(d.util));document.getElementById('rent-neto').style.color=d.util>=0?'var(--lime)':'var(--pink)';
+  const margen=d.totalIng>0?(d.util/d.totalIng*100).toFixed(1):0;
+  set('rent-margen',margen+'%');document.getElementById('rent-margen').style.color=margen>=0?'var(--cyan)':'var(--pink)';
+
+  // Fisio rentabilidad
+  let totalCosteFisio=0;
+  const fisioRentRows=FPROS.map((name,i)=>{
+    const pk=FPRO_KEYS[i];
+    const pd=m.fisio[pk]||emptyPro();
+    const pb=proBreakdown(pd);
+    const fc=m.fisioCost[pk]||{nomina:pk==='fsal'?3000:0,horasExtra:0,extraManual:0};
+    const nomina=fc.nomina||0;
+    const extra=calcFisioExtra(pk,pb.total,fc.horasExtra||0)+(fc.extraManual||0);
+    const costeTot=nomina+extra;
+    totalCosteFisio+=costeTot;
+    const margen=pb.total-costeTot;
+    const pct=pb.total>0?(margen/pb.total*100).toFixed(1):0;
+    const cls=margen>=0?'rent-pos':'rent-neg';
+    return`<tr>
+      <td><span class="dot" style="background:${colorAt(i)}"></span>${name}</td>
+      <td style="font-size:10px;color:var(--muted)">${fmt(pb.indIng+pb.bonIng)}<br>ses./bonos</td>
+      <td style="font-size:10px;color:var(--muted)">${fmt(pb.facturaClinic+pb.efectivo)}<br>clinic+efvo</td>
+      <td style="font-family:'Bebas Neue',sans-serif;color:${colorAt(i)}">${fmt(pb.total)}</td>
+      <td>${fmt(nomina)}</td>
+      <td>${extra>0?('<span class="rent-badge rent-pos">+'+fmt(extra)+'</span>'):'—'}</td>
+      <td>${fmt(costeTot)}</td>
+      <td><span class="rent-badge ${cls}">${fmtR(margen)}</span></td>
+      <td style="color:${margen>=0?'var(--lime)':'var(--pink)'}">${pct}%</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('fisio-rent-table').innerHTML=fisioRentRows;
+
+  // Entrenadores rentabilidad
+  const totalHoras=d.totalHorasGrupo;
+  const ingGrupalTotal=d.ingGrupalCombinado;
+  let totalCosteEntrenadores=0;
+  const rentNames=[];const rentFact=[];const rentCost=[];
+  const trainRentRows=TRAINERS.map((t,i)=>{
+    const pb=epProBreakdown(m.ep[t]||[],trainerClinicOf(m,t));
+    const tc=m.trainerCost[t]||{nomina:0,extra:0,horasGrupo:0};
+    const horas=tc.horasGrupo||0;
+    const ingGrupoAsig=totalHoras>0?(horas/totalHoras)*ingGrupalTotal:0;
+    const facturadoTotal=pb.ing+ingGrupoAsig;
+    const costeTot=(tc.nomina||0)+(tc.extra||0);
+    totalCosteEntrenadores+=costeTot;
+    const margen=facturadoTotal-costeTot;
+    const cls=margen>=0?'rent-pos':'rent-neg';
+    rentNames.push(t);rentFact.push(Math.round(facturadoTotal));rentCost.push(costeTot);
+    return`<tr>
+      <td><span class="dot" style="background:${colorAt(i)}"></span>${t}</td>
+      <td>${pb.units}</td>
+      <td style="font-family:'Bebas Neue',sans-serif;color:${colorAt(i)}">${fmt(pb.ing)}</td>
+      <td>${horas}h</td>
+      <td>${fmt(ingGrupoAsig)}</td>
+      <td>${fmt(tc.nomina||0)}</td>
+      <td>${(tc.extra||0)>0?('<span class="rent-badge rent-pos">+'+fmt(tc.extra)+'</span>'):'—'}</td>
+      <td>${fmt(costeTot)}</td>
+      <td><span class="rent-badge ${cls}">${fmtR(margen)}</span></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('train-rent-table').innerHTML=trainRentRows;
+  const grupoNoOfEl=document.getElementById('rent-grupo-desglose');
+  if(grupoNoOfEl)grupoNoOfEl.innerHTML=`Ingreso grupal oficial (cuotas): <strong style="color:var(--lime)">${fmt(d.ingGrupalOficial)}</strong> &nbsp;+&nbsp; no oficial/efectivo: <strong style="color:var(--cyan)">${fmt(d.ingGrupalNoOficial)}</strong> &nbsp;=&nbsp; total repartido por horas: <strong style="color:var(--text)">${fmt(d.ingGrupalCombinado)}</strong>`;
+  const totalCostePersonal=totalCosteFisio+totalCosteEntrenadores;
+  set('rent-coste-personal',fmt(totalCostePersonal));
+
+  // Rent chart
+  const allNames=[...rentNames,...FPROS];
+  const allFact=[...rentFact,...FPRO_KEYS.map(k=>proBreakdown(m.fisio[k]||emptyPro()).total)];
+  const allCost=[...rentCost,...FPRO_KEYS.map((k)=>{const fc=m.fisioCost[k]||{nomina:k==='fsal'?3000:0,horasExtra:0,extraManual:0};const pb=proBreakdown(m.fisio[k]||emptyPro());return (fc.nomina||0)+calcFisioExtra(k,pb.total,fc.horasExtra||0)+(fc.extraManual||0);})];
+  const allColors=allNames.map((_,i)=>colorAt(i));
+  rentChart.data.labels=allNames;
+  rentChart.data.datasets[0].data=allFact;
+  rentChart.data.datasets[1].data=allCost;
+  rentChart.update();
+  rentDonut.data.labels=allNames;
+  rentDonut.data.datasets[0].data=allFact;
+  rentDonut.data.datasets[0].backgroundColor=allColors;
+  rentDonut.update();
+
+  // ── PROYECCIÓN ──
+  const allTotals=data.map(mo=>mo.d1+mo.d2+mo.d3+mo.d4+mo.d5+(mo.senior||0)+(mo.corredores||0));
+  const realUsrs=allTotals.map((v,i)=>v>0||i<=curM?v:null);
+  const known=realUsrs.filter(v=>v!==null);
+  let slope=0,intercept=0;
+  if(known.length>1){const n=known.length,xm=(n-1)/2,ym=known.reduce((a,b)=>a+b,0)/n;const num=known.reduce((s,y,i)=>s+(i-xm)*(y-ym),0),den=known.reduce((s,_,i)=>s+(i-xm)**2,0);slope=den?num/den:0;intercept=ym-slope*xm;}
+  const projData=MN.map((_,i)=>Math.round(Math.max(intercept+slope*i,0)));
+  set('p-usr',''+projData[11]);
+  const acAltas=data.slice(0,curM+1).reduce((s,mo)=>s+(mo.altasN||0)+(mo.altasA||0)+(mo.corrAltas||0),0);
+  const acBajas=data.slice(0,curM+1).reduce((s,mo)=>s+(mo.bajasLes||0)+(mo.bajasTra||0)+(mo.bajasRes||0)+(mo.bajasNc||0)+(mo.corrBajas||0),0);
+  set('ac-altas',''+acAltas);set('ac-bajas',''+acBajas);set('ac-balance',''+(acAltas-acBajas));
+  const meta=parseInt(document.getElementById('meta-input').value)||230;
+  const curTotal=totalU;
+  const metaPct=Math.min(curTotal/meta*100,100);
+  document.getElementById('meta-bar2').style.width=metaPct+'%';
+  set('meta-pct-lbl2',metaPct.toFixed(1)+'% de la meta ('+meta+' usuarios)');
+  set('p-meta-pct',metaPct.toFixed(0)+'%');
+  set('meta-max',''+Math.max(...allTotals));
+  projChart.data.datasets[0].data=realUsrs;projChart.data.datasets[1].data=projData;projChart.update();
+
+  // ── UPDATE CHARTS ──
+  // Refresh labels/colors for team-dependent charts (team can change dynamically)
+  trainerChart.data.labels=TRAINERS;
+  trainerChart.data.datasets[0].backgroundColor=TRAINERS.map((_,i)=>co(colorAt(i),.85));
+  trainerChart.data.datasets[1].backgroundColor=TRAINERS.map((_,i)=>co(colorAt(i),.3));
+  trainerDonut.data.labels=TRAINERS;
+  trainerDonut.data.datasets[0].backgroundColor=TRAINERS.map((_,i)=>colorAt(i));
+  fisioProChart.data.labels=FPROS;
+  fisioProChart.data.datasets[0].backgroundColor=FPROS.map((_,i)=>co(colorAt(i),.85));
+  fisioProChart.data.datasets[1].backgroundColor=FPROS.map((_,i)=>co(colorAt(i),.3));
+  fisioProDonut.data.labels=FPROS;
+  fisioProDonut.data.datasets[0].backgroundColor=FPROS.map((_,i)=>colorAt(i));
+  const allGrupal=data.map(mo=>mo.d1+mo.d2+mo.d3+mo.d4+mo.d5);
+  usersChart.data.datasets[0].data=allTotals;
+  usersChart.data.datasets[1].data=allGrupal;
+  usersChart.data.datasets[2].data=data.map(mo=>mo.senior||0);
+  usersChart.data.datasets[3].data=data.map(mo=>mo.corredores||0);
+  usersChart.update();
+  altasChart.data.datasets[0].data=data.map(mo=>mo.altasN||0);
+  altasChart.data.datasets[1].data=data.map(mo=>mo.altasA||0);
+  altasChart.data.datasets[2].data=data.map(mo=>(mo.bajasLes||0)+(mo.bajasTra||0)+(mo.bajasRes||0)+(mo.bajasNc||0));
+  altasChart.update();
+  distChart.data.datasets[0].data=[d.grupal,d.seniorIng,d.corrIng,d.epIng,d.fisioIng,d.colabIng];distChart.update();
+  const totLes=data.slice(0,curM+1).reduce((s,mo)=>s+(mo.bajasLes||0),0);
+  const totTra=data.slice(0,curM+1).reduce((s,mo)=>s+(mo.bajasTra||0),0);
+  const totRes=data.slice(0,curM+1).reduce((s,mo)=>s+(mo.bajasRes||0),0);
+  const totNc=data.slice(0,curM+1).reduce((s,mo)=>s+(mo.bajasNc||0),0);
+  bajasMotivosChart.data.datasets[0].data=[totLes,totTra,totRes,totNc];bajasMotivosChart.update();
+  bajasEvolChart.data.datasets[0].data=data.map(mo=>mo.bajasLes||0);
+  bajasEvolChart.data.datasets[1].data=data.map(mo=>mo.bajasTra||0);
+  bajasEvolChart.data.datasets[2].data=data.map(mo=>mo.bajasRes||0);
+  bajasEvolChart.data.datasets[3].data=data.map(mo=>mo.bajasNc||0);
+  bajasEvolChart.update();
+  grupalEvolChart.data.datasets[0].data=allGrupal;
+  grupalEvolChart.data.datasets[1].data=data.map(mo=>mo.senior||0);
+  grupalEvolChart.data.datasets[2].data=data.map(mo=>mo.corredores||0);
+  grupalEvolChart.update();
+  const prevM=prevMonthObj(curM);
+  trainerChart.data.datasets[0].data=TRAINERS.map(t=>epProBreakdown(m.ep[t]||[],trainerClinicOf(m,t)).ing);
+  trainerChart.data.datasets[1].data=TRAINERS.map(t=>prevM?epProBreakdown(prevM.ep[t]||[],trainerClinicOf(prevM,t)).ing:0);trainerChart.update();
+  epEvolChart.data.datasets[0].data=data.map(mo=>epTotal(mo).units);
+  epEvolChart.data.datasets[1].data=data.map(mo=>mo.epYoy||null);epEvolChart.update();
+  trainerDonut.data.datasets[0].data=TRAINERS.map(t=>epProBreakdown(m.ep[t]||[],trainerClinicOf(m,t)).ing);trainerDonut.update();
+  fisioDonut.data.datasets[0].data=[d.fb.indIng,d.fb.bonIng,d.fb.facturaClinic+d.fb.efectivo];fisioDonut.update();
+  fisioProDonut.data.datasets[0].data=FPRO_KEYS.map(k=>proBreakdown(m.fisio[k]||emptyPro()).total);fisioProDonut.update();
+  fisioProChart.data.datasets[0].data=FPRO_KEYS.map(k=>{const pb=proBreakdown(m.fisio[k]||emptyPro());return pb.indSes+pb.bonN;});
+  fisioProChart.data.datasets[1].data=FPRO_KEYS.map(k=>{if(!prevM)return 0;const pb=proBreakdown(prevM.fisio[k]||emptyPro());return pb.indSes+pb.bonN;});fisioProChart.update();
+  fisioEvolChart.data.datasets[0].data=data.map(mo=>fisioTotal(mo).indIng);
+  fisioEvolChart.data.datasets[1].data=data.map(mo=>fisioTotal(mo).bonIng);
+  fisioEvolChart.data.datasets[2].data=data.map(mo=>{const t=fisioTotal(mo);return t.facturaClinic+t.efectivo;});fisioEvolChart.update();
+  saludEvolChart.data.datasets[0].data=data.map(mo=>mo.ni||0);
+  saludEvolChart.data.datasets[1].data=data.map(mo=>mo.pi||0);
+  saludEvolChart.data.datasets[2].data=data.map(mo=>mo.pfbI||0);
+  saludEvolChart.data.datasets[3].data=data.map(mo=>(mo.colaboradores||[]).reduce((s,c)=>s+(c.cantidad||0),0));saludEvolChart.update();
+  gastoDonut.data.datasets[0].data=[m.nom,m.alq,m.sum,m.mkt,m.man,m.matf||0,m.mate||0,m.otr,m.imp||0,m.fin||0,d.gastosCustomTotal];gastoDonut.update();
+  gastoStack.data.datasets[0].data=data.map(mo=>mo.nom);gastoStack.data.datasets[1].data=data.map(mo=>mo.alq);
+  gastoStack.data.datasets[2].data=data.map(mo=>mo.sum);gastoStack.data.datasets[3].data=data.map(mo=>mo.mkt);
+  gastoStack.data.datasets[4].data=data.map(mo=>mo.imp||0);
+  gastoStack.data.datasets[5].data=data.map(mo=>(mo.man||0)+(mo.matf||0)+(mo.mate||0)+(mo.otr||0));gastoStack.update();
+}
+
+// ═══ EP PRO VIEW ═══
+function renderEpPro(m,globalEpT){
+  const isTotal=curEpPro===-1;
+  const name=isTotal?'TOTAL CENTRO':TRAINERS[curEpPro].toUpperCase();
+  set('ep-pro-name',name);
+  const pb=isTotal?globalEpT:epProBreakdown(m.ep[TRAINERS[curEpPro]]||[],trainerClinicOf(m,TRAINERS[curEpPro]));
+  const pmEp=prevMonthObj(curM);
+  const prevPb=pmEp?(isTotal?derive(pmEp).epT:epProBreakdown(pmEp.ep[TRAINERS[curEpPro]]||[],trainerClinicOf(pmEp,TRAINERS[curEpPro]))):null;
+  const diffIng=prevPb?pb.ing-prevPb.ing:null;
+  const diffUnits=prevPb?pb.units-prevPb.units:null;
+  const sxd=m.diaslab>0?(pb.units/m.diaslab).toFixed(1):'—';
+  document.getElementById('ep-pro-kpis').innerHTML=`
+    <div class="sblock"><div class="kl">Sesiones</div><div class="sbig" style="color:#35d4f1">${pb.units}${diffUnits!==null?' <span style="font-size:14px" class="'+(diffUnits>=0?'up':'dn')+'">'+(diffUnits>=0?'+':'')+diffUnits+'</span>':''}</div><div class="ssub">del mes</div></div>
+    <div class="sblock"><div class="kl">Ses/día lab.</div><div class="sbig" style="color:#35f1b8;font-size:24px">${sxd}</div><div class="ssub">${m.diaslab} días</div></div>
+    <div class="sblock"><div class="kl">Clinic+Efvo</div><div class="sbig" style="color:#f1d435;font-size:22px">${fmt(pb.facturaClinic+pb.efectivo)}</div><div class="ssub">Clinic Cloud + efectivo</div></div>
+    <div class="sblock"><div class="kl">Ingresos totales</div><div class="sbig" style="color:#c8f135;font-size:22px">${fmt(pb.ing)}${diffIng!==null?' <span style="font-size:12px" class="'+(diffIng>=0?'up':'dn')+'">'+(diffIng>=0?'+':'')+fmt(diffIng)+'</span>':''}</div><div class="ssub">del mes</div></div>
+    <div class="sblock"><div class="kl">€/sesión media</div><div class="sbig" style="color:#f18135;font-size:22px">${pb.units?fmt(pb.sesIng/pb.units):'—'}</div><div class="ssub">precio medio (solo sesiones)</div></div>
+    <div class="sblock"><div class="kl">Estado</div><div class="sbig" style="color:#35f1b8;font-size:20px">${pb.units>0?'ACTIVO':'SIN SES.'}</div><div class="ssub">este mes</div></div>`;
+  document.getElementById('ep-pro-table').innerHTML=pb.svcs.filter(x=>x.u>0||!isTotal).map(x=>{
+    const pct=globalEpT.ing?(x.u*x.p/globalEpT.ing*100).toFixed(1):0;
+    return`<tr><td><span class="dot" style="background:${x.color}"></span>${x.label}</td><td>€${x.p}</td><td>${x.u}</td><td>${fmt(x.u*x.p)}</td>
+    <td><div>${pct}%</div><div class="mb"><div class="mf" style="background:${x.color};width:${pct}%"></div></div></td></tr>`;
+  }).concat([`<tr class="total-row"><td>TOTAL</td><td>—</td><td>${pb.units}</td><td>${fmt(pb.ing)}</td><td>100%</td></tr>`]).join('');
+}
+function showEpPro(idx,btn){
+  curEpPro=idx;document.querySelectorAll('#ep-pro-tabs .stab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  const m=monthObj(curM);renderEpPro(m,epTotal(m));
+}
+
+// ═══ FISIO PRO VIEW ═══
+function renderFisioPro(m,globalFb){
+  const isTotal=curFisioPro===-1;
+  set('fisio-pro-name',isTotal?'TOTAL CENTRO':FPROS[curFisioPro].toUpperCase());
+  const pb=isTotal?globalFb:proBreakdown(m.fisio[FPRO_KEYS[curFisioPro]]||emptyPro());
+  const pmFi=prevMonthObj(curM);
+  const prevPb=pmFi?(isTotal?fisioTotal(pmFi):proBreakdown(pmFi.fisio[FPRO_KEYS[curFisioPro]]||emptyPro())):null;
+  const totSes=pb.indSes+pb.bonN;const diffSes=prevPb?totSes-(prevPb.indSes+prevPb.bonN):null;const diffIng=prevPb?pb.total-prevPb.total:null;
+  document.getElementById('pro-kpis').innerHTML=`
+    <div class="sblock"><div class="kl">Ses. indiv.</div><div class="sbig" style="color:#9b5cf6">${pb.indSes}</div><div class="ssub">${fmt(pb.indIng)}</div></div>
+    <div class="sblock"><div class="kl">Bonos</div><div class="sbig" style="color:#35d4f1">${pb.bonN}</div><div class="ssub">${fmt(pb.bonIng)}</div></div>
+    <div class="sblock"><div class="kl">Clinic+Efvo</div><div class="sbig" style="color:#f1d435;font-size:22px">${fmt(pb.facturaClinic+pb.efectivo)}</div><div class="ssub">Clinic Cloud + efectivo</div></div>
+    <div class="sblock"><div class="kl">Total ses.</div><div class="sbig" style="color:#c8f135">${totSes}${diffSes!==null?' <span style="font-size:14px" class="'+(diffSes>=0?'up':'dn')+'">'+(diffSes>=0?'+':'')+diffSes+'</span>':''}</div><div class="ssub">vs mes anterior</div></div>
+    <div class="sblock"><div class="kl">Ingresos totales</div><div class="sbig" style="color:#f18135;font-size:22px">${fmt(pb.total)}${diffIng!==null?' <span style="font-size:12px" class="'+(diffIng>=0?'up':'dn')+'">'+(diffIng>=0?'+':'')+fmt(diffIng)+'</span>':''}</div><div class="ssub">del mes</div></div>`;
+  if(curFisioType==='ind'){
+    document.getElementById('pro-ind-section').style.display='';document.getElementById('pro-bon-section').style.display='none';
+    document.getElementById('pro-ind-table').innerHTML=pb.inds.map(x=>{const pct=globalFb.total?(x.u*x.p/globalFb.total*100).toFixed(1):0;
+      return`<tr><td><span class="dot" style="background:${x.color}"></span>${x.label}</td><td>€${x.p}</td><td>${x.u}</td><td>${fmt(x.u*x.p)}</td><td><div>${pct}%</div><div class="mb"><div class="mf" style="background:${x.color};width:${pct}%"></div></div></td></tr>`;
+    }).concat([`<tr class="total-row"><td>TOTAL individuales</td><td>—</td><td>${pb.indSes}</td><td>${fmt(pb.indIng)}</td><td>—</td></tr>`]).join('');
+  }else{
+    document.getElementById('pro-ind-section').style.display='none';document.getElementById('pro-bon-section').style.display='';
+    document.getElementById('pro-bon-table').innerHTML=pb.bons.map(x=>{const pct=globalFb.total?(x.u*x.p/globalFb.total*100).toFixed(1):0;
+      return`<tr><td><span class="dot" style="background:${x.color}"></span>${x.label}</td><td>€${x.p}</td><td>${x.u}</td><td>${fmt(x.u*x.p)}</td><td><div>${pct}%</div><div class="mb"><div class="mf" style="background:${x.color};width:${pct}%"></div></div></td></tr>`;
+    }).concat([`<tr class="total-row"><td>TOTAL bonos</td><td>—</td><td>${pb.bonN}</td><td>${fmt(pb.bonIng)}</td><td>—</td></tr>`]).join('');
+  }
+}
+function showFisioPro(idx,btn){
+  curFisioPro=idx;document.querySelectorAll('#fisio-pro-tabs .stab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  const m=monthObj(curM);renderFisioPro(m,fisioTotal(m));
+}
+function showFisioType(type,btn){
+  curFisioType=type;
+  document.getElementById('fisio-type-ind').classList.toggle('active',type==='ind');
+  document.getElementById('fisio-type-bon').classList.toggle('active',type==='bon');
+  const m=monthObj(curM);renderFisioPro(m,fisioTotal(m));
+}
+
+// ═══ INPUT GRIDS ═══
+function buildEpGrid(m,idx){
+  const t=TRAINERS[idx];const td=m.ep[t]||[];
+  set('inp-ep-name',TRAINERS[idx]);
+  const hg=document.getElementById('inp-ep-horas');
+  if(hg)hg.value=m.trainerCost[t]?.horasGrupo||0;
+  const tc=trainerClinicOf(m,t);
+  const clinicEl=document.getElementById('inp-ep-clinic');if(clinicEl)clinicEl.value=tc.facturaClinic||0;
+  const efvEl=document.getElementById('inp-ep-efectivo');if(efvEl)efvEl.value=tc.efectivo||0;
+  document.getElementById('inp-ep-grid').innerHTML=EP_LABELS.map((lbl,i)=>`
+    <div class="il" style="font-size:10px">${lbl} (€${EP_PRICES[i]})</div>
+    <input class="inf" type="number" id="ei-${i}" value="${td[i]||0}" min="0">`
+  ).join('');
+}
+function saveEpGrid(m,idx){
+  const t=TRAINERS[idx];if(!m.ep[t])m.ep[t]=EP_PRICES.map(()=>0);
+  m.ep[t]=EP_PRICES.map((_,i)=>parseInt(document.getElementById('ei-'+i)?.value)||0);
+  if(!m.trainerCost[t])m.trainerCost[t]={nomina:0,extra:0,horasGrupo:0};
+  m.trainerCost[t].horasGrupo=parseFloat(document.getElementById('inp-ep-horas')?.value)||0;
+  if(!m.trainerClinic)m.trainerClinic=emptyTrainerClinic();
+  if(!m.trainerClinic[t])m.trainerClinic[t]={facturaClinic:0,efectivo:0};
+  m.trainerClinic[t].facturaClinic=parseFloat(document.getElementById('inp-ep-clinic')?.value)||0;
+  m.trainerClinic[t].efectivo=parseFloat(document.getElementById('inp-ep-efectivo')?.value)||0;
+}
+function showInpEp(idx,btn){
+  saveEpGrid(data[curM],curInpEp);curInpEp=idx;
+  document.querySelectorAll('#inp-ep-tabs .stab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  buildEpGrid(data[curM],idx);
+}
+
+function buildInpGrids(m,proIdx){
+  const pk=FPRO_KEYS[proIdx];const pd=m.fisio[pk]||emptyPro();
+  set('inp-pro-name',FPROS[proIdx]);
+  const fc=m.fisioCost[pk]||{nomina:pk==='fsal'?3000:0,horasExtra:0,extraManual:0};
+  const nomEl=document.getElementById('inp-fisio-nomina');if(nomEl)nomEl.value=fc.nomina||0;
+  const clinicEl=document.getElementById('inp-fisio-clinic');if(clinicEl)clinicEl.value=pd.facturaClinic||0;
+  const efvEl=document.getElementById('inp-fisio-efectivo');if(efvEl)efvEl.value=pd.efectivo||0;
+  // Show/hide horas extra (only Andrea)
+  const heRow=document.getElementById('inp-fisio-extra-row');
+  if(heRow)heRow.style.display=pk==='andr'?'':'none';
+  const heEl=document.getElementById('inp-fisio-horasextra');if(heEl)heEl.value=fc.horasExtra||0;
+  document.getElementById('inp-ind-grid').innerHTML=IND_LABELS.map((lbl,i)=>{
+    const isOtras=i===IND_LABELS.length-1;const pVal=isOtras?(pd.indOtrasP||0):IND_PRICES[i];
+    return`<div class="il">${lbl}</div>
+     <input class="inf" type="number" id="fi-ind${i}p" value="${pVal}" ${isOtras?'placeholder="precio"':'readonly style="opacity:.5"'}>
+     <input class="inf" type="number" id="fi-ind${i}" value="${pd.ind[i]||0}" min="0">`;
+  }).join('');
+  document.getElementById('inp-bon-grid').innerHTML=BON_LABELS.map((lbl,i)=>`
+    <div class="il">${lbl}</div>
+    <input class="inf" type="number" id="fi-bon${i}p" value="${BON_PRICES[i]}" readonly style="opacity:.5">
+    <input class="inf" type="number" id="fi-bon${i}" value="${pd.bon[i]||0}" min="0">`
+  ).join('');
+}
+function saveInpGrids(m,proIdx){
+  const pk=FPRO_KEYS[proIdx];if(!m.fisio[pk])m.fisio[pk]=emptyPro();
+  m.fisio[pk].ind=IND_PRICES.map((_,i)=>parseInt(document.getElementById('fi-ind'+i)?.value)||0);
+  m.fisio[pk].bon=BON_PRICES.map((_,i)=>parseInt(document.getElementById('fi-bon'+i)?.value)||0);
+  m.fisio[pk].indOtrasP=parseFloat(document.getElementById('fi-ind'+(IND_LABELS.length-1)+'p')?.value)||0;
+  m.fisio[pk].facturaClinic=parseFloat(document.getElementById('inp-fisio-clinic')?.value)||0;
+  m.fisio[pk].efectivo=parseFloat(document.getElementById('inp-fisio-efectivo')?.value)||0;
+  if(!m.fisioCost[pk])m.fisioCost[pk]={nomina:pk==='fsal'?3000:0,horasExtra:0,extraManual:0};
+  m.fisioCost[pk].nomina=parseFloat(document.getElementById('inp-fisio-nomina')?.value)||0;
+  m.fisioCost[pk].horasExtra=parseFloat(document.getElementById('inp-fisio-horasextra')?.value)||0;
+}
+function showInpPro(idx,btn){
+  saveInpGrids(data[curM],curInpPro);curInpPro=idx;
+  document.querySelectorAll('#inp-pro-tabs .stab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  buildInpGrids(data[curM],idx);
+}
+
+// Build trainer cost grid
+function buildTrainerCostGrid(m){
+  document.getElementById('train-cost-grid').innerHTML=TRAINERS.map((t,i)=>`
+    <div style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px">
+      <div style="font-size:10px;color:${colorAt(i)};margin-bottom:4px;letter-spacing:1px">${t.toUpperCase()}</div>
+      <div class="ir"><div class="il">Nómina empresa (€)</div><input class="inf" type="number" id="tc-nom-${i}" value="${m.trainerCost[t]?.nomina||0}" min="0"></div>
+      <div class="ir"><div class="il">Extra mes (€)</div><input class="inf" type="number" id="tc-ext-${i}" value="${m.trainerCost[t]?.extra||0}" min="0"></div>
+    </div>`).join('');
+}
+function buildFisioCostGrid(m){
+  document.getElementById('fisio-cost-grid').innerHTML=FPRO_KEYS.map((k,i)=>`
+    <div style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px">
+      <div style="font-size:10px;color:${colorAt(i)};margin-bottom:4px;letter-spacing:1px">${FPROS[i].toUpperCase()}</div>
+      <div class="ir"><div class="il">Nómina empresa (€)</div><input class="inf" type="number" id="fc-nom-${i}" value="${m.fisioCost[k]?.nomina||(k==='fsal'?3000:0)}" min="0"></div>
+      ${k==='andr'?`<div class="ir"><div class="il">Horas extra</div><input class="inf" type="number" id="fc-he-${i}" value="${m.fisioCost[k]?.horasExtra||0}" min="0" step="0.5"></div>`:''}
+      <div class="ir"><div class="il">Extra manual (€)</div><input class="inf" type="number" id="fc-ex-${i}" value="${m.fisioCost[k]?.extraManual||0}" min="0"></div>
+    </div>`).join('');
+}
+
+// ═══ CONTROLS ═══
+function syncBajas(){
+  const les=parseInt(document.getElementById('i-bajas-les')?.value)||0;
+  const tra=parseInt(document.getElementById('i-bajas-tra')?.value)||0;
+  const res=parseInt(document.getElementById('i-bajas-res')?.value)||0;
+  const nc=parseInt(document.getElementById('i-bajas-nc')?.value)||0;
+  const tot=les+tra+res+nc;
+  const d=document.getElementById('bajas-total-display');if(d)d.textContent=tot;
+}
+const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v??'';};
+function setIngresarTabEnabled(enabled){
+  const btn=[...document.querySelectorAll('.tab')].find(b=>(b.getAttribute('onclick')||'').includes("showPage('ingresar'"));
+  if(!btn)return;
+  btn.disabled=!enabled;
+  btn.style.opacity=enabled?'':'.35';
+  btn.style.cursor=enabled?'':'not-allowed';
+  btn.title=enabled?'':'Anual es una vista agregada de solo lectura — elige un mes concreto para editar datos';
+}
+function changeMonth(){
+  curM=parseInt(document.getElementById('msel').value);
+  setIngresarTabEnabled(!isAnual(curM));
+  if(isAnual(curM)){
+    const onIngresar=document.getElementById('page-ingresar')&&document.getElementById('page-ingresar').classList.contains('active');
+    if(onIngresar){
+      const resumenBtn=[...document.querySelectorAll('.tab')].find(b=>(b.getAttribute('onclick')||'').includes("showPage('resumen'"));
+      if(resumenBtn)showPage('resumen',resumenBtn);
+    }
+    renderAll();
+    return;
+  }
+  const m=data[curM];
+  sv('i-d1',m.d1);sv('i-d1p',m.d1p||22);sv('i-d2',m.d2);sv('i-d2p',m.d2p||32);
+  sv('i-d3',m.d3);sv('i-d3p',m.d3p||40);sv('i-d4',m.d4);sv('i-d4p',m.d4p||46);
+  sv('i-d5',m.d5);sv('i-d5p',m.d5p||50);
+  sv('i-senior',m.senior);sv('i-seniorp',m.seniorp||28);
+  sv('i-corredores',m.corredores||0);sv('i-corredoresp',m.corredoresp||40);
+  sv('i-corr-altas',m.corrAltas||0);sv('i-corr-bajas',m.corrBajas||0);
+  sv('i-altas-n',m.altasN);sv('i-altas-a',m.altasA);
+  sv('i-bajas-les',m.bajasLes||0);sv('i-bajas-tra',m.bajasTra||0);
+  sv('i-bajas-res',m.bajasRes||0);sv('i-bajas-nc',m.bajasNc||0);
+  syncBajas();
+  sv('i-yoy-usr',m.yoyUsr||0);sv('i-diaslab',m.diaslab||20);
+  sv('i-ep-yoy',m.epYoy||0);
+  sv('i-ep-altas-n',m.epAltasN||0);sv('i-ep-altas-a',m.epAltasA||0);sv('i-ep-bajas',m.epBajas||0);
+  buildEpGrid(m,curInpEp);
+  buildInpGrids(m,curInpPro);
+  sv('i-nc',m.nc);sv('i-ni',m.ni);sv('i-nc-nota',m.ncNota);
+  sv('i-pp',m.pp);sv('i-pi',m.pi);sv('i-pp-nota',m.ppNota);
+  sv('i-pfb-n',m.pfbN);sv('i-pfb-i',m.pfbI);sv('i-pfb-nota',m.pfbNota);
+  sv('i-grupo-noof',m.grupoNoOficial||0);
+  sv('i-nom',m.nom);sv('i-alq',m.alq||3200);sv('i-sum',m.sum);sv('i-mkt',m.mkt);
+  sv('i-man',m.man);sv('i-matf',m.matf||0);sv('i-mate',m.mate||0);sv('i-otr',m.otr);
+  sv('i-imp',m.imp||0);sv('i-fin',m.fin||0);sv('i-deu',m.deu||0);sv('i-noiva',m.noIva||0);
+  buildTrainerCostGrid(m);buildFisioCostGrid(m);
+  renderGastosCustomList();
+  renderColaboradoresList();
+  renderAll();
+}
+
+// ═══ TEAM MANAGEMENT (add/remove trainers & fisios) ═══
+function buildEpProTabs(){
+  const el=document.getElementById('ep-pro-tabs');if(!el)return;
+  el.innerHTML=TRAINERS.map((t,i)=>`<button class="stab${i===curEpPro?' active':''}" onclick="showEpPro(${i},this)">${t}</button>`).join('')
+    +`<button class="stab${curEpPro===-1?' active':''}" onclick="showEpPro(-1,this)">📊 Total Centro</button>`;
+}
+function buildFisioProTabs(){
+  const el=document.getElementById('fisio-pro-tabs');if(!el)return;
+  el.innerHTML=FPROS.map((n,i)=>`<button class="stab${i===curFisioPro?' active':''}" onclick="showFisioPro(${i},this)">${n}</button>`).join('')
+    +`<button class="stab${curFisioPro===-1?' active':''}" onclick="showFisioPro(-1,this)">📊 Total Centro</button>`;
+}
+function buildInpEpTabs(){
+  const el=document.getElementById('inp-ep-tabs');if(!el)return;
+  el.innerHTML=TRAINERS.map((t,i)=>`<button class="stab${i===curInpEp?' active':''}" onclick="showInpEp(${i},this)">${t}</button>`).join('');
+}
+function buildInpProTabs(){
+  const el=document.getElementById('inp-pro-tabs');if(!el)return;
+  el.innerHTML=FPROS.map((n,i)=>`<button class="stab${i===curInpPro?' active':''}" onclick="showInpPro(${i},this)">${n}</button>`).join('');
+}
+function renderTeamLists(){
+  const trEl=document.getElementById('team-trainers-list');
+  if(trEl)trEl.innerHTML=TRAINERS.map((t,i)=>`<span class="team-chip" style="border-color:${colorAt(i)}"><span style="color:${colorAt(i)}">●</span>${t}<button onclick="removeTrainerUI(${JSON.stringify(t)})" title="Quitar">✕</button></span>`).join('');
+  const fiEl=document.getElementById('team-fisios-list');
+  if(fiEl)fiEl.innerHTML=FPROS.map((n,i)=>`<span class="team-chip" style="border-color:${colorAt(i)}"><span style="color:${colorAt(i)}">●</span>${n}<button onclick="removeFisioUI(${JSON.stringify(FPRO_KEYS[i])})" title="Quitar">✕</button></span>`).join('');
+}
+function slugKey(name,existing){
+  let base=name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'').slice(0,6)||'pro';
+  let key=base,n=1;
+  while(existing.includes(key)){key=base+(n++);}
+  return key;
+}
+function refreshTeamUI(){
+  if(isAnual(curM)){renderTeamLists();buildEpProTabs();buildFisioProTabs();buildInpEpTabs();buildInpProTabs();persistData();renderAll();return;}
+  renderTeamLists();
+  buildEpProTabs();buildFisioProTabs();buildInpEpTabs();buildInpProTabs();
+  buildEpGrid(data[curM],curInpEp);
+  buildInpGrids(data[curM],curInpPro);
+  buildTrainerCostGrid(data[curM]);buildFisioCostGrid(data[curM]);
+  persistData();
+  renderAll();
+}
+function addTrainerUI(){
+  const el=document.getElementById('team-trainer-new');
+  const name=(el.value||'').trim();
+  if(!name)return;
+  if(TRAINERS.includes(name)){alert('Ese entrenador ya existe.');return;}
+  TRAINERS.push(name);
+  data.forEach(mo=>{
+    if(!mo.ep[name])mo.ep[name]=EP_PRICES.map(()=>0);
+    if(!mo.trainerCost[name])mo.trainerCost[name]={nomina:0,extra:0,horasGrupo:0};
+    if(!mo.trainerClinic)mo.trainerClinic=emptyTrainerClinic();
+    if(!mo.trainerClinic[name])mo.trainerClinic[name]={facturaClinic:0,efectivo:0};
+  });
+  el.value='';
+  refreshTeamUI();
+}
+function removeTrainerUI(name){
+  if(TRAINERS.length<=1){alert('Debe quedar al menos un entrenador.');return;}
+  if(!confirm('¿Quitar a '+name+' del equipo? Sus datos históricos se mantienen guardados pero dejará de aparecer en tablas y gráficos.'))return;
+  TRAINERS=TRAINERS.filter(t=>t!==name);
+  if(curEpPro>=TRAINERS.length)curEpPro=0;
+  if(curInpEp>=TRAINERS.length)curInpEp=0;
+  refreshTeamUI();
+}
+function addFisioUI(){
+  const el=document.getElementById('team-fisio-new');
+  const name=(el.value||'').trim();
+  if(!name)return;
+  if(FPROS.includes(name)){alert('Ese fisioterapeuta ya existe.');return;}
+  const key=slugKey(name,FPRO_KEYS);
+  FPROS.push(name);FPRO_KEYS.push(key);
+  data.forEach(mo=>{
+    if(!mo.fisio[key])mo.fisio[key]=emptyPro();
+    if(!mo.fisioCost[key])mo.fisioCost[key]={nomina:0,horasExtra:0,extraManual:0};
+  });
+  el.value='';
+  refreshTeamUI();
+}
+function removeFisioUI(key){
+  if(FPROS.length<=1){alert('Debe quedar al menos un fisioterapeuta.');return;}
+  const idx=FPRO_KEYS.indexOf(key);
+  if(idx===-1)return;
+  const name=FPROS[idx];
+  if(!confirm('¿Quitar a '+name+' del equipo? Sus datos históricos se mantienen guardados pero dejará de aparecer en tablas y gráficos.'))return;
+  FPROS.splice(idx,1);FPRO_KEYS.splice(idx,1);
+  if(curFisioPro>=FPROS.length)curFisioPro=0;
+  if(curInpPro>=FPROS.length)curInpPro=0;
+  refreshTeamUI();
+}
+
+// ═══ GASTOS PERSONALIZADOS ═══
+function renderGastosCustomList(){
+  const el=document.getElementById('gastos-custom-list');if(!el)return;
+  if(isAnual(curM)){el.innerHTML='<div class="list-empty">Anual es una vista de solo lectura.</div>';return;}
+  const m=data[curM];const list=m.gastosCustom||[];
+  el.innerHTML=list.length?list.map((g,i)=>`
+    <div class="list-row">
+      <input class="inf" type="text" value="${(g.nombre||'').replace(/"/g,'&quot;')}" style="flex:2" onchange="editGastoCustom(${i},'nombre',this.value)">
+      <input class="inf" type="number" value="${g.cantidad||0}" min="0" style="flex:1" onchange="editGastoCustom(${i},'cantidad',this.value)">
+      <button class="list-row-del" onclick="removeGastoCustom(${i})" title="Quitar">✕</button>
+    </div>`).join('') : '<div class="list-empty">Sin gastos personalizados este mes.</div>';
+}
+function addGastoCustom(){
+  if(isAnual(curM))return;
+  const nEl=document.getElementById('gc-new-nombre'),cEl=document.getElementById('gc-new-cantidad');
+  const nombre=(nEl.value||'').trim();const cantidad=parseFloat(cEl.value)||0;
+  if(!nombre)return;
+  const m=data[curM];if(!m.gastosCustom)m.gastosCustom=[];
+  m.gastosCustom.push({nombre,cantidad});
+  nEl.value='';cEl.value='';
+  renderGastosCustomList();persistData();renderAll();
+}
+function editGastoCustom(i,field,val){
+  if(isAnual(curM))return;
+  const m=data[curM];if(!m.gastosCustom||!m.gastosCustom[i])return;
+  m.gastosCustom[i][field]=field==='cantidad'?(parseFloat(val)||0):val;
+  persistData();renderAll();
+}
+function removeGastoCustom(i){
+  if(isAnual(curM))return;
+  const m=data[curM];if(!m.gastosCustom)return;
+  m.gastosCustom.splice(i,1);
+  renderGastosCustomList();persistData();renderAll();
+}
+
+// ═══ COLABORADORES (lista libre) ═══
+function renderColaboradoresList(){
+  const el=document.getElementById('colaboradores-list');if(!el)return;
+  if(isAnual(curM)){el.innerHTML='<div class="list-empty">Anual es una vista de solo lectura.</div>';return;}
+  const m=data[curM];const list=m.colaboradores||[];
+  el.innerHTML=list.length?list.map((c,i)=>`
+    <div class="list-row">
+      <input class="inf" type="text" value="${(c.nombre||'').replace(/"/g,'&quot;')}" style="flex:2" onchange="editColaborador(${i},'nombre',this.value)">
+      <input class="inf" type="number" value="${c.cantidad||0}" min="0" style="flex:1" onchange="editColaborador(${i},'cantidad',this.value)">
+      <button class="list-row-del" onclick="removeColaborador(${i})" title="Quitar">✕</button>
+    </div>`).join('') : '<div class="list-empty">Sin colaboradores añadidos.</div>';
+}
+function addColaborador(){
+  if(isAnual(curM))return;
+  const nEl=document.getElementById('col-new-nombre'),cEl=document.getElementById('col-new-cantidad');
+  const nombre=(nEl.value||'').trim();const cantidad=parseFloat(cEl.value)||0;
+  if(!nombre)return;
+  const m=data[curM];if(!m.colaboradores)m.colaboradores=[];
+  m.colaboradores.push({nombre,cantidad});
+  nEl.value='';cEl.value='';
+  renderColaboradoresList();persistData();renderAll();
+}
+function editColaborador(i,field,val){
+  if(isAnual(curM))return;
+  const m=data[curM];if(!m.colaboradores||!m.colaboradores[i])return;
+  m.colaboradores[i][field]=field==='cantidad'?(parseFloat(val)||0):val;
+  persistData();renderAll();
+}
+function removeColaborador(i){
+  if(isAnual(curM))return;
+  const m=data[curM];if(!m.colaboradores)return;
+  m.colaboradores.splice(i,1);
+  renderColaboradoresList();persistData();renderAll();
+}
+
+function persistData(){
+  const now=new Date().toLocaleString('es-ES',{dateStyle:'short',timeStyle:'short'});
+  try{localStorage.setItem(KEY,JSON.stringify({months:data,team:{trainers:TRAINERS,fpros:FPROS,fproKeys:FPRO_KEYS},lastSaved:now}));}catch(e){}
+  const luEl=document.getElementById('lu');if(luEl)luEl.textContent='Último guardado: '+now;
+  pushToFirebase();
+  return now;
+}
+
+// ═══ FIREBASE SYNC — comparte los datos en tiempo real con tu socio ═══
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBmA3yVoLyEOD-r7i1SVaICWmtc36ZJRNk",
+  authDomain: "dashboard-centroimpulso.firebaseapp.com",
+  databaseURL: "https://dashboard-centroimpulso-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "dashboard-centroimpulso",
+  storageBucket: "dashboard-centroimpulso.firebasestorage.app",
+  messagingSenderId: "286542835738",
+  appId: "1:286542835738:web:644b20f61ba4b4ec86e1a3",
+  measurementId: "G-QJ9VHZ4G5Y"
+};
+const FIREBASE_PATH = 'impulso_v1';
+let fbRef = null, fbReady = false;
+
+function setSyncStatus(state, label){
+  const dot=document.getElementById('sync-dot'), lbl=document.getElementById('sync-label');
+  if(!dot||!lbl) return;
+  const colors={connecting:'var(--yellow)',synced:'var(--lime)',error:'var(--pink)',saving:'var(--cyan)'};
+  dot.style.background=colors[state]||'var(--muted)';
+  lbl.textContent=label;
+}
+
+function initFirebaseSync(){
+  if(!window.firebase){ setSyncStatus('error','Sin conexión (solo local)'); return; }
+  try{ firebase.initializeApp(FIREBASE_CONFIG); }
+  catch(e){ setSyncStatus('error','Error Firebase'); return; }
+  firebase.auth().signInAnonymously().catch(()=>{
+    setSyncStatus('error','Error de acceso — revisa Authentication > Anónimo en Firebase');
+  });
+  firebase.auth().onAuthStateChanged(user=>{
+    if(!user) return;
+    fbReady=true;
+    fbRef=firebase.database().ref(FIREBASE_PATH);
+    setSyncStatus('connecting','Sincronizando…');
+    fbRef.on('value', snap=>{
+      const val=snap.val();
+      if(!val||!val.months||val.months.length!==12){
+        pushToFirebase();
+        setSyncStatus('synced','Sincronizado (nube inicializada)');
+        return;
+      }
+      applyRemoteData(val);
+      setSyncStatus('synced','Sincronizado con tu socio');
+    }, ()=>{ setSyncStatus('error','Sin conexión (solo local)'); });
+  });
+}
+
+function applyRemoteData(val){
+  data=val.months;
+  if(val.team){
+    if(Array.isArray(val.team.trainers)&&val.team.trainers.length) TRAINERS=val.team.trainers;
+    if(Array.isArray(val.team.fpros)&&val.team.fpros.length&&Array.isArray(val.team.fproKeys)&&val.team.fproKeys.length===val.team.fpros.length){
+      FPROS=val.team.fpros; FPRO_KEYS=val.team.fproKeys;
+    }
+  }
+  ensureTeamFields();
+  if(curEpPro>=TRAINERS.length) curEpPro=0;
+  if(curInpEp>=TRAINERS.length) curInpEp=0;
+  if(curFisioPro>=FPROS.length) curFisioPro=0;
+  if(curInpPro>=FPROS.length) curInpPro=0;
+  const onInputPage=document.getElementById('page-ingresar')&&document.getElementById('page-ingresar').classList.contains('active');
+  buildEpProTabs();buildFisioProTabs();buildInpEpTabs();buildInpProTabs();renderTeamLists();
+  if(onInputPage){
+    // No tocamos los campos de "Ingresar datos" para no interrumpir lo que se esté escribiendo;
+    // el resto del dashboard sí se actualiza. Al cambiar de mes/pestaña se sincroniza del todo.
+    renderAll();
+    showRemoteUpdateToast();
+  }else{
+    changeMonth();
+  }
+  try{ localStorage.setItem(KEY, JSON.stringify({months:data, team:{trainers:TRAINERS,fpros:FPROS,fproKeys:FPRO_KEYS}, lastSaved:new Date().toLocaleString('es-ES',{dateStyle:'short',timeStyle:'short'})})); }catch(e){}
+}
+
+function showRemoteUpdateToast(){
+  const t=document.getElementById('toast');
+  if(!t) return;
+  t.textContent='🔄 Tu socio actualizó datos — cambia de mes para verlos aquí';
+  t.classList.add('show');
+  setTimeout(()=>{ t.classList.remove('show'); t.textContent='✓ Datos guardados'; },4000);
+}
+
+function pushToFirebase(){
+  if(!fbReady||!fbRef) return;
+  setSyncStatus('saving','Guardando en la nube…');
+  fbRef.set({
+    months: data,
+    team: { trainers: TRAINERS, fpros: FPROS, fproKeys: FPRO_KEYS },
+    lastSaved: new Date().toLocaleString('es-ES',{dateStyle:'short',timeStyle:'short'})
+  }).then(()=> setSyncStatus('synced','Sincronizado con tu socio'))
+    .catch(()=> setSyncStatus('error','Error al guardar en la nube'));
+}
+function updateMonth(){
+  if(isAnual(curM)){alert('Anual es una vista agregada de solo lectura — elige un mes concreto para editar datos.');return;}
+  const g=id=>parseFloat(document.getElementById(id)?.value)||0;
+  const gi=id=>parseInt(document.getElementById(id)?.value)||0;
+  const gs=id=>document.getElementById(id)?.value||'';
+  const m=data[curM];
+  m.d1=gi('i-d1');m.d1p=g('i-d1p');m.d2=gi('i-d2');m.d2p=g('i-d2p');
+  m.d3=gi('i-d3');m.d3p=g('i-d3p');m.d4=gi('i-d4');m.d4p=g('i-d4p');
+  m.d5=gi('i-d5');m.d5p=g('i-d5p');
+  m.senior=gi('i-senior');m.seniorp=g('i-seniorp');
+  m.corredores=gi('i-corredores');m.corredoresp=g('i-corredoresp');
+  m.corrAltas=gi('i-corr-altas');m.corrBajas=gi('i-corr-bajas');
+  m.altasN=gi('i-altas-n');m.altasA=gi('i-altas-a');
+  m.bajasLes=gi('i-bajas-les');m.bajasTra=gi('i-bajas-tra');
+  m.bajasRes=gi('i-bajas-res');m.bajasNc=gi('i-bajas-nc');
+  m.yoyUsr=gi('i-yoy-usr');m.diaslab=gi('i-diaslab');
+  m.epYoy=gi('i-ep-yoy');
+  m.epAltasN=gi('i-ep-altas-n');m.epAltasA=gi('i-ep-altas-a');m.epBajas=gi('i-ep-bajas');
+  m.grupoNoOficial=g('i-grupo-noof');
+  saveEpGrid(m,curInpEp);
+  saveInpGrids(m,curInpPro);
+  m.nc=gi('i-nc');m.ni=g('i-ni');m.ncNota=gs('i-nc-nota');
+  m.pp=gi('i-pp');m.pi=g('i-pi');m.ppNota=gs('i-pp-nota');
+  m.pfbN=gi('i-pfb-n');m.pfbI=g('i-pfb-i');m.pfbNota=gs('i-pfb-nota');
+  m.nom=g('i-nom');m.alq=g('i-alq');m.sum=g('i-sum');m.mkt=g('i-mkt');
+  m.man=g('i-man');m.matf=g('i-matf');m.mate=g('i-mate');m.otr=g('i-otr');
+  m.imp=g('i-imp');m.fin=g('i-fin');m.deu=g('i-deu');m.noIva=g('i-noiva');
+  // Trainer costs
+  TRAINERS.forEach((t,i)=>{
+    if(!m.trainerCost[t])m.trainerCost[t]={nomina:0,extra:0,horasGrupo:0};
+    m.trainerCost[t].nomina=g('tc-nom-'+i);
+    m.trainerCost[t].extra=g('tc-ext-'+i);
+  });
+  // Fisio costs from separate grid
+  FPRO_KEYS.forEach((k,i)=>{
+    if(!m.fisioCost[k])m.fisioCost[k]={nomina:k==='fsal'?3000:0,horasExtra:0,extraManual:0};
+    m.fisioCost[k].nomina=g('fc-nom-'+i);
+    if(k==='andr')m.fisioCost[k].horasExtra=g('fc-he-'+i);
+    m.fisioCost[k].extraManual=g('fc-ex-'+i);
+  });
+  persistData();
+  const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);
+  renderAll();
+}
+
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+buildEpProTabs();buildFisioProTabs();buildInpEpTabs();buildInpProTabs();renderTeamLists();
+changeMonth();
+initFirebaseSync();
+
+// ═══ IVA ═══
+const IVA_RATE = 0.21;
+function calcIVA(m) {
+  const d = derive(m);
+  // Fisio siempre sin IVA
+  const sinIVA = d.fisioIng + (m.noIva || 0);
+  const conIVA = d.totalIng - sinIVA;
+  const ivaRepercutido = conIVA * IVA_RATE / (1 + IVA_RATE); // si precios incluyen IVA
+  return { sinIVA, conIVA, ivaRepercutido: Math.round(ivaRepercutido), baseImponible: Math.round(conIVA / (1 + IVA_RATE)) };
+}
+
+// ═══ IMPORT — Clinic Cloud PDFs (deterministic local parsing, no AI/network) ═══
+const CITAS_AGENDA_MAP = {
+  'Miguel':'Miguel',
+  'Gregorio López':'Gregorio','Gregorio':'Gregorio',
+  'Agenda David Ruiz':'Ruiz','David Ruiz':'Ruiz','Ruiz':'Ruiz',
+  'David Zaragoza':'Zaragoza','Zaragoza':'Zaragoza',
+  'Agenda Francisco Salinas':'Francisco Salinas','Francisco Salinas':'Francisco Salinas',
+  'Agenda Alejandro Fisioterapia':'Alejandro Camacho','Alejandro Camacho':'Alejandro Camacho',
+  'Andrea':'Andrea',
+  'Javi Garcia Gil':'Javi','Javi':'Javi',
+  'Morata':'Morata',
+  'Manolo':'Manolo','Juanmi':'Juanmi','Luis':'Luis',
+};
+const SUMMARY_ESPECIALIDADES = ['Fisioterapia','Entrenamiento Personal'];
+function moneyToNum(s){ if(!s) return 0; return parseFloat(String(s).replace(/\./g,'').replace(',','.'))||0; }
+
+function groupItemsIntoRowsXY(items, tolerance){
+  tolerance = tolerance || 2;
+  const rows=[]; let cur=null, curY=null;
+  for(const item of items){
+    const y=item.transform[5], x=item.transform[4];
+    if(curY===null||Math.abs(y-curY)>tolerance){ if(cur) rows.push(cur); cur=[]; curY=y; }
+    if(item.str && item.str.trim()) cur.push({str:item.str, x});
+  }
+  if(cur && cur.length) rows.push(cur);
+  return rows;
+}
+function findColumnBoundaries(rows){
+  for(const row of rows){
+    const strs=row.map(it=>it.str);
+    if(strs.includes('FECHA')&&strs.includes('ESTADO')&&strs.includes('AGENDA')){
+      const find=s=>row.find(it=>it.str===s);
+      const fecha=find('FECHA'),estado=find('ESTADO'),asunto=find('ASUNTO'),agenda=find('AGENDA'),
+            servicios=find('SERVICIOS'),tipo=find('TIPO'),importe=find('IMPORTE'),pagado=find('PAGADO'),debe=find('DEBE');
+      if(fecha&&estado&&asunto&&agenda&&servicios&&tipo&&importe&&pagado&&debe){
+        return [
+          {col:'fecha',x:fecha.x},{col:'estado',x:estado.x},{col:'asunto',x:asunto.x},{col:'agenda',x:agenda.x},
+          {col:'servicio',x:servicios.x},{col:'tipo',x:tipo.x},{col:'importe',x:importe.x},
+          {col:'pagado',x:pagado.x},{col:'debe',x:debe.x},
+        ];
+      }
+    }
+  }
+  return null;
+}
+function assignRowToColumns(row,bounds){
+  const out={fecha:'',estado:'',asunto:'',agenda:'',servicio:'',tipo:'',importe:'',pagado:'',debe:''};
+  for(const item of row){
+    let col=null;
+    for(let i=0;i<bounds.length;i++){ if(item.x>=bounds[i].x-5) col=bounds[i].col; else break; }
+    if(!col) continue;
+    out[col]=(out[col]?out[col]+' ':'')+item.str;
+  }
+  Object.keys(out).forEach(k=>out[k]=out[k].trim());
+  return out;
+}
+function isDateRow(row){ return /^\d{2}\/\d{2}\/\d{4}$/.test(row[0]&&row[0].str); }
+function looksLikeCitasReport(rows){ return !!findColumnBoundaries(rows); }
+function parseCitasPages(pagesOfRows){
+  const results=[]; let bounds=null;
+  for(const rows of pagesOfRows){
+    if(!bounds) bounds=findColumnBoundaries(rows);
+    if(!bounds) continue;
+    for(const row of rows){
+      if(!isDateRow(row)) continue;
+      const rec=assignRowToColumns(row,bounds);
+      if(!rec.tipo||!rec.importe) continue;
+      const canon=CITAS_AGENDA_MAP[rec.agenda]||null;
+      results.push({
+        fecha:rec.fecha, estado:rec.estado, asunto:rec.asunto,
+        agenda:rec.agenda, agendaCanon: canon || ('Sin asignar ('+rec.agenda+')'), agendaMapped: !!canon,
+        servicio:rec.servicio, tipo:rec.tipo,
+        importe:moneyToNum(rec.importe), pagado:moneyToNum(rec.pagado), debe:moneyToNum(rec.debe),
+      });
+    }
+  }
+  return results;
+}
+function aggregateCitas(records){
+  const perPro={}, meses={};
+  for(const c of records){
+    const parts=c.fecha.split('/'); const mm=parts[1], yyyy=parts[2];
+    const mesKey=yyyy+'-'+mm; meses[mesKey]=(meses[mesKey]||0)+1;
+    const key=c.agendaCanon;
+    if(!perPro[key]) perPro[key]={importe:0,pagado:0,debe:0,count:0,mapped:c.agendaMapped};
+    perPro[key].importe+=c.importe; perPro[key].pagado+=c.pagado; perPro[key].debe+=c.debe; perPro[key].count++;
+  }
+  let bestMes=null,bestCount=-1;
+  Object.entries(meses).forEach(([k,v])=>{ if(v>bestCount){bestMes=k;bestCount=v;} });
+  return {perPro, meses, bestMes, totalRecords: records.length};
+}
+function looksLikeSummaryReport(rows){
+  for(const row of rows){
+    const strs=row.map(it=>it.str);
+    if(strs.includes('Clínica')&&strs.includes('Especialidad')&&strs.includes('Servicio')&&strs.includes('Mutua')) return true;
+  }
+  return false;
+}
+function parseSummaryPages(pagesOfRows){
+  const results=[];
+  for(const rows of pagesOfRows){
+    for(const row of rows){
+      const idx=row.findIndex(it=>SUMMARY_ESPECIALIDADES.includes(it.str));
+      if(idx===-1) continue;
+      const especialidad=row[idx].str;
+      const servicio=row[idx+1]&&row[idx+1].str;
+      const numeric=row.slice(idx+3).map(it=>it.str);
+      if(!servicio||numeric.length<9) continue;
+      const nCitas=numeric[1], importeTotal=numeric[8];
+      if(!/^\d+$/.test(nCitas)) continue;
+      results.push({especialidad, servicio, nCitas:parseInt(nCitas,10), importeTotal:moneyToNum(importeTotal)});
+    }
+  }
+  return results;
+}
+function aggregateSummary(records){
+  const porEspecialidad={}; let total=0, totalCitas=0;
+  for(const r of records){
+    if(!porEspecialidad[r.especialidad]) porEspecialidad[r.especialidad]={importe:0,citas:0};
+    porEspecialidad[r.especialidad].importe+=r.importeTotal;
+    porEspecialidad[r.especialidad].citas+=r.nCitas;
+    total+=r.importeTotal; totalCitas+=r.nCitas;
+  }
+  return {porEspecialidad, total, totalCitas};
+}
+function rowsToText(pagesOfRows){
+  return pagesOfRows.map(rows=>rows.map(row=>row.map(it=>it.str).join(' ').replace(/\s+/g,' ').trim()).join('\n')).join('\n');
+}
+function looksLikeGastosReport(rows){
+  return rows.some(row=>row.map(it=>it.str).join(' ').trim()==='Gastos Operativos');
+}
+function parseGastosPages(pagesOfRows){
+  const out=[];
+  for(const rows of pagesOfRows){
+    for(const row of rows){
+      const strs=row.map(it=>it.str);
+      const joined=strs.join(' ').trim();
+      if(!joined||joined==='Gastos Operativos'||/^Tabla\s*\d+$/i.test(joined)||/^\d+$/.test(joined)) continue;
+      const euroIdx=strs.findIndex(s=>s==='€');
+      let nombre=null,cantidad=null;
+      if(euroIdx>0 && /^[\d.,]+$/.test(strs[euroIdx-1])){
+        cantidad=moneyToNum(strs[euroIdx-1]);
+        nombre=strs.slice(0,euroIdx-1).join(' ').trim();
+      } else {
+        nombre=joined;
+      }
+      if(!nombre) continue;
+      out.push({nombre,cantidad});
+    }
+  }
+  return out;
+}
+const MESES_LARGO=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+function looksLikeGruposReport(fullText){
+  return /Altas\s*nuevas/i.test(fullText) && /Total\s*Usuarios\s*mes/i.test(fullText);
+}
+function parseGruposReport(fullText){
+  const g=re=>fullText.match(re);
+  const num=(m,i)=>m?parseInt(m[i],10):null;
+  const d1=num(g(/1\s*d[ií]a\s*(\d+)/i),1);
+  const d2=num(g(/2\s*d[ií]as\s*(\d+)/i),1);
+  const d3=num(g(/3\s*d[ií]as\s*(\d+)/i),1);
+  const d4=num(g(/4\s*d[ií]as\s*(\d+)/i),1);
+  const d5=num(g(/5\s*d[ií]as\s*(\d+)/i),1);
+  const altasNM=g(/Altas\s*nuevas([\s\S]*?)\((\d+)\)/i);
+  const altasAM=g(/Altas\s*Antiguas([\s\S]*?)\((\d+)\)/i);
+  const bajasM=g(/\bBajas\s+([\s\S]*?)\((\d+)\)\s*\n\s*Total/i);
+  const seniorM=g(/Grupo\s*senior\s*(\d+)\s*usuarios/i);
+  const yoyM=g(/que\s+\S+\s+(20\d{2})\.\s*\((\d+)\)/i);
+  const totalUsuariosM=g(/Total\s*Usuarios\s*mes\s*(\d+)/i);
+  const lines=fullText.split('\n').map(l=>l.trim());
+  let mesIdx=null;
+  for(const l of lines){ const up=l.toUpperCase(); const found=MESES_LARGO.findIndex(mn=>mn.toUpperCase()===up); if(found>=0){ mesIdx=found; break; } }
+  const found=d1!==null||d2!==null||d3!==null||!!altasNM||!!bajasM;
+  return {
+    d1,d2,d3,d4,d5,
+    totalDias: totalUsuariosM?parseInt(totalUsuariosM[1],10):null,
+    altasN: altasNM?parseInt(altasNM[2],10):null,
+    altasNames: altasNM?altasNM[1].replace(/\s+/g,' ').trim():'',
+    altasA: altasAM?parseInt(altasAM[2],10):null,
+    altasANames: altasAM?altasAM[1].replace(/\s+/g,' ').trim():'',
+    bajas: bajasM?parseInt(bajasM[2],10):null,
+    bajasNames: bajasM?bajasM[1].replace(/\s+/g,' ').trim():'',
+    senior: seniorM?parseInt(seniorM[1],10):null,
+    yoyUsr: yoyM?parseInt(yoyM[2],10):null,
+    mesIdx, found,
+  };
+}
+async function extractPdfPagesRows(file){
+  const buf=await file.arrayBuffer();
+  const doc=await pdfjsLib.getDocument({data:new Uint8Array(buf)}).promise;
+  const pages=[];
+  for(let p=1;p<=doc.numPages;p++){
+    const page=await doc.getPage(p);
+    const content=await page.getTextContent();
+    pages.push(groupItemsIntoRowsXY(content.items));
+  }
+  return pages;
+}
+
+let importState = { citasRecords: [], summaryAgg: null, gastosRecords: [], gruposData: null, filesInfo: [] };
+
+function openImportModal() {
+  document.getElementById('import-modal').classList.add('open');
+  document.getElementById('import-status').className = 'import-status';
+  document.getElementById('import-status').textContent = '';
+  document.getElementById('import-preview').style.display = 'none';
+  document.getElementById('file-input').value = '';
+  importState = { citasRecords: [], summaryAgg: null, gastosRecords: [], gruposData: null, filesInfo: [] };
+}
+function closeImportModal() {
+  document.getElementById('import-modal').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeImportModal(); });
+
+function handleDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
+function handleDragLeave(e) { document.getElementById('drop-zone').classList.remove('drag-over'); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag-over');
+  const files = [...e.dataTransfer.files];
+  if (files.length) processImportFiles(files);
+}
+function handleFileSelect(e) {
+  const files = [...e.target.files];
+  if (files.length) processImportFiles(files);
+}
+function showImportStatus(msg, type) {
+  const el = document.getElementById('import-status');
+  el.textContent = msg;
+  el.className = 'import-status' + (type ? (' ' + type) : '');
+}
+
+async function processImportFiles(files) {
+  document.getElementById('import-preview').style.display = 'none';
+  importState = { citasRecords: [], summaryAgg: null, gastosRecords: [], gruposData: null, filesInfo: [] };
+  let summaryRecordsAll = [];
+  for (const file of files) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (ext !== 'pdf') {
+      importState.filesInfo.push({ name: file.name, status: 'Formato .' + ext + ' aún no soportado automáticamente — sube PDFs de Clinic Cloud, Gastos o Informe de Grupos' });
+      continue;
+    }
+    showImportStatus('⏳ Leyendo ' + file.name + '...', 'info');
+    try {
+      const pages = await extractPdfPagesRows(file);
+      const fullText = rowsToText(pages);
+      if (pages.length && looksLikeCitasReport(pages[0])) {
+        const recs = parseCitasPages(pages);
+        importState.citasRecords.push(...recs);
+        importState.filesInfo.push({ name: file.name, status: '✓ Informe de citas — ' + recs.length + ' citas leídas' });
+      } else if (pages.length && looksLikeSummaryReport(pages[0])) {
+        const recs = parseSummaryPages(pages);
+        summaryRecordsAll.push(...recs);
+        importState.filesInfo.push({ name: file.name, status: '✓ Resumen por servicio — ' + recs.length + ' servicios leídos' });
+      } else if (pages.length && looksLikeGastosReport(pages[0])) {
+        const recs = parseGastosPages(pages);
+        importState.gastosRecords.push(...recs);
+        const conImporte = recs.filter(r => r.cantidad !== null).length;
+        importState.filesInfo.push({ name: file.name, status: '✓ Informe de gastos — ' + conImporte + ' partidas con importe' });
+      } else if (looksLikeGruposReport(fullText)) {
+        const gd = parseGruposReport(fullText);
+        importState.gruposData = gd;
+        importState.filesInfo.push({ name: file.name, status: '✓ Informe de grupos — usuarios, altas/bajas y senior detectados' });
+      } else {
+        importState.filesInfo.push({ name: file.name, status: '⚠️ No reconocido (soportados: citas, resumen por servicio, gastos, informe de grupos)' });
+      }
+    } catch (err) {
+      importState.filesInfo.push({ name: file.name, status: '❌ Error leyendo: ' + err.message });
+    }
+  }
+  if (summaryRecordsAll.length) importState.summaryAgg = aggregateSummary(summaryRecordsAll);
+
+  if (!importState.citasRecords.length && !importState.summaryAgg && !importState.gastosRecords.length && !importState.gruposData) {
+    showImportStatus('❌ No se ha reconocido ningún informe compatible en los archivos subidos.', 'err');
+    return;
+  }
+  showImportStatus('✅ Archivos leídos. Revisa los datos abajo antes de confirmar.', 'ok');
+  setupImportMonthSelect();
+  renderImportPreview();
+  document.getElementById('import-preview').style.display = 'block';
+}
+
+function setupImportMonthSelect() {
+  const sel = document.getElementById('import-mes-select');
+  sel.innerHTML = MN.map((mn, i) => `<option value="${i}">${mn}</option>`).join('');
+  let detected = isAnual(curM) ? 0 : curM;
+  if (importState.citasRecords.length) {
+    const agg = aggregateCitas(importState.citasRecords);
+    if (agg.bestMes) { const mm = parseInt(agg.bestMes.split('-')[1], 10) - 1; if (mm >= 0 && mm < 12) detected = mm; }
+  } else if (importState.gruposData && importState.gruposData.mesIdx !== null && importState.gruposData.mesIdx !== undefined) {
+    detected = importState.gruposData.mesIdx;
+  }
+  sel.value = String(detected);
+  sel.onchange = renderImportPreview;
+}
+
+function renderImportPreview() {
+  const figureEl = document.getElementById('import-figure-select');
+  const figure = figureEl ? figureEl.value : 'importe';
+  const mIdx = parseInt(document.getElementById('import-mes-select').value, 10);
+  const m = data[mIdx];
+  let html = '<div style="margin-bottom:10px">' + importState.filesInfo.map(f => `<div style="font-size:11px;color:var(--muted)">📄 ${f.name} — ${f.status}</div>`).join('') + '</div>';
+
+  if (importState.citasRecords.length) {
+    const agg = aggregateCitas(importState.citasRecords);
+    html += `<div style="font-size:10px;color:var(--cyan);font-weight:600;letter-spacing:1px;margin:10px 0 6px">FACTURACIÓN POR PROFESIONAL — se guardará en "Facturación Clinic Cloud" (${figure === 'importe' ? 'importe facturado' : 'pagado / cobrado'})</div>`;
+    html += '<table class="tbl"><thead><tr><th>Profesional</th><th>Citas</th><th>Importe</th><th>Pagado</th><th>Pendiente</th><th>Valor actual</th><th>Nuevo valor</th></tr></thead><tbody>';
+    const names = Object.keys(agg.perPro).sort((a, b) => agg.perPro[b].importe - agg.perPro[a].importe);
+    names.forEach(name => {
+      const v = agg.perPro[name];
+      const newVal = figure === 'importe' ? v.importe : v.pagado;
+      let current = null;
+      if (v.mapped) {
+        if (TRAINERS.includes(name)) current = trainerClinicOf(m, name).facturaClinic || 0;
+        else { const fk = FPRO_KEYS[FPROS.indexOf(name)]; if (fk) current = (m.fisio[fk] || {}).facturaClinic || 0; }
+      }
+      html += `<tr style="${v.mapped ? '' : 'opacity:.6'}">
+        <td>${name}${v.mapped ? '' : ' <span style="color:var(--muted);font-size:10px">(sin asignar — revisar a mano)</span>'}</td>
+        <td>${v.count}</td>
+        <td>${fmt(v.importe)}</td>
+        <td>${fmt(v.pagado)}</td>
+        <td>${fmt(v.debe)}</td>
+        <td style="color:var(--muted)">${current !== null ? fmt(current) : '—'}</td>
+        <td style="color:var(--lime);font-weight:600">${v.mapped ? fmt(newVal) : '—'}</td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    html += '<div style="font-size:10px;color:var(--muted);margin-top:8px">Esto SUSTITUYE el valor actual de "Facturación Clinic Cloud" de cada profesional para el mes elegido (no se suma).</div>';
+  }
+
+  if (importState.summaryAgg) {
+    const s = importState.summaryAgg;
+    html += '<div style="font-size:10px;color:var(--cyan);font-weight:600;letter-spacing:1px;margin:14px 0 6px">RESUMEN POR SERVICIO (informativo — no se aplica automáticamente)</div>';
+    html += `<div style="font-size:11px;color:var(--muted);margin-bottom:6px">Total centro: ${fmt(s.total)} en ${s.totalCitas} citas — ` + Object.entries(s.porEspecialidad).map(([k, v]) => k + ': ' + fmt(v.importe)).join(' · ') + '</div>';
+  }
+
+  if (importState.gastosRecords.length) {
+    html += '<div style="font-size:10px;color:var(--cyan);font-weight:600;letter-spacing:1px;margin:14px 0 6px">GASTOS DETECTADOS — se guardarán en "Otros gastos" (Salarios → Nóminas y Alquiler → Alquiler van a sus campos fijos)</div>';
+    html += '<table class="tbl"><thead><tr><th>Concepto</th><th>Importe</th><th>Destino</th></tr></thead><tbody>';
+    importState.gastosRecords.forEach(r => {
+      const norm = r.nombre.trim().toLowerCase();
+      let destino = 'Gastos personalizados';
+      if (norm === 'salarios') destino = 'Nóminas totales (fijo)';
+      else if (norm === 'alquiler') destino = 'Alquiler (fijo)';
+      const sinDatos = r.cantidad === null;
+      html += `<tr style="${sinDatos ? 'opacity:.5' : ''}">
+        <td>${r.nombre}</td>
+        <td>${sinDatos ? '<span style="color:var(--muted)">sin dato este mes</span>' : fmt(r.cantidad)}</td>
+        <td style="color:var(--muted);font-size:11px">${sinDatos ? '— (no se importa)' : destino}</td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    html += '<div style="font-size:10px;color:var(--muted);margin-top:8px">Esto sustituye SOLO los gastos personalizados importados anteriormente para el mes elegido — los que hayas añadido a mano se conservan.</div>';
+  }
+
+  if (importState.gruposData) {
+    const gd = importState.gruposData;
+    html += '<div style="font-size:10px;color:var(--cyan);font-weight:600;letter-spacing:1px;margin:14px 0 6px">INFORME DE GRUPOS — usuarios, altas, bajas y senior</div>';
+    html += '<table class="tbl"><thead><tr><th>Dato</th><th>Valor detectado</th></tr></thead><tbody>';
+    const rowHtml = (label, val) => `<tr><td>${label}</td><td style="color:var(--lime);font-weight:600">${val === null || val === undefined ? '—' : val}</td></tr>`;
+    html += rowHtml('1 día', gd.d1);
+    html += rowHtml('2 días', gd.d2);
+    html += rowHtml('3 días', gd.d3);
+    html += rowHtml('4 días', gd.d4);
+    html += rowHtml('5 días', gd.d5);
+    html += rowHtml('Total grupal (suma días)', gd.totalDias);
+    html += rowHtml('Altas nuevas', gd.altasN);
+    html += rowHtml('Altas antiguas', gd.altasA);
+    html += rowHtml('Bajas (total)', gd.bajas);
+    html += rowHtml('Grupo senior', gd.senior);
+    html += rowHtml('Usuarios mismo mes año anterior', gd.yoyUsr);
+    html += '</tbody></table>';
+    if (gd.bajasNames) html += `<div style="font-size:10px;color:var(--muted);margin-top:6px">Motivos de baja listados en el PDF (para reclasificar a mano si quieres más detalle): ${gd.bajasNames}</div>`;
+    html += '<div style="font-size:10px;color:var(--muted);margin-top:8px">Las bajas se importan todas como "No sabemos" (motivo genérico) — reclasifícalas en Ingresar datos si quieres el desglose por Lesión/Trabajo/Residencia. El resto de valores SUSTITUYE los del mes elegido.</div>';
+  }
+
+  document.getElementById('import-preview-content').innerHTML = html;
+}
+
+function confirmImport() {
+  if (!importState.citasRecords.length && !importState.gastosRecords.length && !importState.gruposData) { closeImportModal(); return; }
+  const figureEl = document.getElementById('import-figure-select');
+  const figure = figureEl ? figureEl.value : 'importe';
+  const mIdx = parseInt(document.getElementById('import-mes-select').value, 10);
+  const m = data[mIdx];
+  const parts = [];
+
+  if (importState.citasRecords.length) {
+    const agg = aggregateCitas(importState.citasRecords);
+    let n = 0;
+    Object.entries(agg.perPro).forEach(([name, v]) => {
+      if (!v.mapped) return;
+      const val = figure === 'importe' ? v.importe : v.pagado;
+      if (TRAINERS.includes(name)) {
+        if (!m.trainerClinic) m.trainerClinic = emptyTrainerClinic();
+        if (!m.trainerClinic[name]) m.trainerClinic[name] = { facturaClinic: 0, efectivo: 0 };
+        m.trainerClinic[name].facturaClinic = val;
+        n++;
+      } else {
+        const fk = FPRO_KEYS[FPROS.indexOf(name)];
+        if (fk) {
+          if (!m.fisio[fk]) m.fisio[fk] = emptyPro();
+          m.fisio[fk].facturaClinic = val;
+          n++;
+        }
+      }
+    });
+    parts.push(n + ' profesionales (facturación)');
+  }
+
+  if (importState.gastosRecords.length) {
+    let n = 0;
+    if (!Array.isArray(m.gastosCustom)) m.gastosCustom = [];
+    m.gastosCustom = m.gastosCustom.filter(g => !g.imported);
+    importState.gastosRecords.forEach(r => {
+      if (r.cantidad === null) return;
+      const norm = r.nombre.trim().toLowerCase();
+      if (norm === 'salarios') { m.nom = r.cantidad; n++; }
+      else if (norm === 'alquiler') { m.alq = r.cantidad; n++; }
+      else { m.gastosCustom.push({ nombre: r.nombre, cantidad: r.cantidad, imported: true }); n++; }
+    });
+    parts.push(n + ' partidas de gastos');
+  }
+
+  if (importState.gruposData) {
+    const gd = importState.gruposData;
+    if (gd.d1 !== null) m.d1 = gd.d1;
+    if (gd.d2 !== null) m.d2 = gd.d2;
+    if (gd.d3 !== null) m.d3 = gd.d3;
+    if (gd.d4 !== null) m.d4 = gd.d4;
+    if (gd.d5 !== null) m.d5 = gd.d5;
+    if (gd.senior !== null) m.senior = gd.senior;
+    if (gd.altasN !== null) m.altasN = gd.altasN;
+    if (gd.altasA !== null) m.altasA = gd.altasA;
+    if (gd.bajas !== null) { m.bajasLes = 0; m.bajasTra = 0; m.bajasRes = 0; m.bajasNc = gd.bajas; }
+    if (gd.yoyUsr !== null) m.yoyUsr = gd.yoyUsr;
+    parts.push('informe de grupos');
+  }
+
+  const msel = document.getElementById('msel');
+  if (msel) { msel.value = mIdx; curM = mIdx; }
+  changeMonth();
+  persistData();
+  closeImportModal();
+  const t = document.getElementById('toast');
+  t.textContent = '✓ Importado: ' + (parts.join(' · ') || 'sin cambios');
+  t.classList.add('show');
+  setTimeout(() => { t.classList.remove('show'); t.textContent = '✓ Datos guardados'; }, 3000);
+}
+
+// ═══ AI ANALYSIS ═══
+async function generateAnalysis() {
+  const btn = document.getElementById('analysis-btn');
+  const spinner = document.getElementById('analysis-spinner');
+  const btnText = document.getElementById('analysis-btn-text');
+  const output = document.getElementById('analysis-output');
+
+  btn.disabled = true;
+  spinner.classList.add('active');
+  btnText.textContent = 'ANALIZANDO...';
+  output.innerHTML = '<div class="analysis-body"><div style="color:var(--muted);text-align:center;padding:40px">⏳ Claude está analizando todos los datos del centro...</div></div>';
+
+  const m = monthObj(curM);
+  const d = derive(m);
+  const MNS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const mesNombre = isAnual(curM) ? 'año completo 2026 (Ene–Dic, todos los meses agregados)' : (MNS[curM] + ' 2026');
+  const pmA = prevMonthObj(curM);
+  const prev = pmA ? derive(pmA) : null;
+  const prevMes = pmA ? MNS[curM - 1] : null;
+  const iva = calcIVA(m);
+
+  // Build full data context
+  const context = {
+    mes: mesNombre,
+    año: 2026,
+    usuariosGeneral: d.totalGrupal,
+    usuariosSenior: m.senior,
+    usuariosCorredores: m.corredores || 0,
+    totalUsuarios: d.totalUsers,
+    usuariosYoY: m.yoyUsr || 0,
+    altasNuevas: m.altasN, altasAntiguas: m.altasA,
+    bajas: { lesion: m.bajasLes, trabajo: m.bajasTra, residencia: m.bajasRes, noSabemos: m.bajasNc, total: d.bajas },
+    retencion: d.ret.toFixed(1) + '%',
+    frecuencias: { '1d': m.d1, '2d': m.d2, '3d': m.d3, '4d': m.d4, '5d': m.d5 },
+    ingresosGrupal: Math.round(d.grupal), ingresosSenior: Math.round(d.seniorIng), ingresosCorredores: Math.round(d.corrIng),
+    ingresosEP: Math.round(d.epIng), sesionesEP: d.epSes, diasLaborables: m.diaslab,
+    sesionesPorDia: m.diaslab > 0 ? (d.epSes / m.diaslab).toFixed(1) : 0,
+    epPorEntrenador: TRAINERS.reduce((o, t) => { const pb = epProBreakdown(m.ep[t] || [], trainerClinicOf(m,t)); o[t] = { sesiones: pb.units, ingresos: Math.round(pb.ing), clinicCloud: pb.facturaClinic, efectivo: pb.efectivo }; return o; }, {}),
+    ingresosFisio: Math.round(d.fisioIng),
+    ingresosColaboradores: Math.round(d.colabIng),
+    ingresosTotal: Math.round(d.totalIng),
+    gastoTotal: Math.round(d.gas),
+    resultadoNeto: Math.round(d.util),
+    margenPct: d.totalIng > 0 ? (d.util / d.totalIng * 100).toFixed(1) : 0,
+    desglosegastos: { nominas: m.nom, alquiler: m.alq, suministros: m.sum, marketing: m.mkt, mantenimiento: m.man, matFisio: m.matf || 0, matEntreno: m.mate || 0, otros: m.otr, impuestos: m.imp || 0, financieros: m.fin || 0 },
+    ivaRepercutido: iva.ivaRepercutido,
+    ingresosSinIVA: Math.round(iva.sinIVA),
+    mesAnterior: prev ? { totalUsuarios: prev.totalUsers, ingresosTotal: Math.round(prev.totalIng), resultadoNeto: Math.round(prev.util), bajas: prev.bajas, sesionesEP: prev.epSes } : null,
+    nombreMesAnterior: prevMes,
+    evolucionUltimosMeses: (isAnual(curM) ? data : data.slice(Math.max(0, curM - 5), curM + 1)).map((mo, i) => { const idx = isAnual(curM) ? i : Math.max(0, curM - 5) + i; return { mes: MNS[idx], usuarios: mo.d1 + mo.d2 + mo.d3 + mo.d4 + mo.d5 + (mo.senior || 0) + (mo.corredores || 0), ingresos: Math.round(derive(mo).totalIng), resultado: Math.round(derive(mo).util) }; })
+  };
+
+  const prompt = `Eres el CEO y director financiero de Centro Impulso, un centro deportivo y de fisioterapia en España.
+
+Aquí están todos los datos de ${mesNombre}:
+${JSON.stringify(context, null, 2)}
+
+Genera un informe ejecutivo COMPLETO y DETALLADO en español con las siguientes secciones usando HTML (usa <h2> para secciones principales, <h3> para subsecciones, <p> para párrafos, <ul><li> para listas, <strong> para destacar cifras clave):
+
+1. **RESUMEN EJECUTIVO** — 3-4 frases con lo más importante del mes
+2. **ANÁLISIS DE USUARIOS** — evolución, retención, comparativa con mes anterior y año anterior, análisis de frecuencias, preocupaciones y oportunidades
+3. **ANÁLISIS FINANCIERO** — ingresos por línea de negocio, gastos, resultado neto, margen, IVA, comparativas
+4. **ENTRENAMIENTO PERSONAL** — rendimiento por entrenador, sesiones/día, comparativas, quién destaca y quién preocupa
+5. **BAJAS: ANÁLISIS Y ALERTAS** — desglose por motivo, tendencias, qué hacer con cada tipo
+6. **ESTACIONALIDAD Y CONTEXTO** — qué esperar del mes siguiente, patrones típicos de este período del año en centros deportivos españoles
+7. **OPORTUNIDADES DE MARKETING** — mínimo 5 acciones concretas y accionables específicas para este centro y este mes, con copy sugerido, canal y timing
+8. **PRIORIDADES PARA EL MES SIGUIENTE** — top 3 acciones urgentes con justificación
+
+Sé específico, usa los datos reales, compara cifras, identifica tendencias. Habla como un CEO que conoce el negocio a fondo. No seas genérico.`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const result = await resp.json();
+    if (result.error) throw new Error(result.error.message);
+
+    let html = result.content.filter(b => b.type === 'text').map(b => b.text).join('');
+    // Convert markdown to HTML if needed
+    html = html.replace(/^## (.*)/gm, '<h2>$1</h2>').replace(/^### (.*)/gm, '<h3>$1</h3>').replace(/^\*\*(.*?)\*\*/gm, '<strong>$1</strong>').replace(/^- (.*)/gm, '<li>$1</li>').replace(/(<li>.*<\/li>\n?)+/gs, m => '<ul>' + m + '</ul>').replace(/\n\n/g, '</p><p>').replace(/^(?!<[hup])/gm, '<p>').replace(/<p><\/p>/g, '');
+
+    const timestamp = new Date().toLocaleString('es-ES', { dateStyle: 'medium', timeStyle: 'short' });
+    output.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:10px;color:var(--muted)">Generado: ${timestamp} · Mes analizado: <strong style="color:var(--lime)">${mesNombre} 2026</strong></div>
+        <button onclick="window.print()" style="background:var(--s2);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:7px;font-size:11px;cursor:pointer">🖨 Imprimir</button>
+      </div>
+      <div class="analysis-body">${html}</div>`;
+  } catch (err) {
+    output.innerHTML = `<div class="analysis-body"><p style="color:var(--pink)">❌ Error: ${err.message}. Asegúrate de estar conectado a internet e inténtalo de nuevo.</p></div>`;
+  }
+
+  btn.disabled = false;
+  spinner.classList.remove('active');
+  btnText.textContent = '⚡ REGENERAR ANÁLISIS';
+}
+
+// Update analysis month label on month change
+const _origChangeMonth = changeMonth;
+changeMonth = function() {
+  _origChangeMonth();
+  const MNS2 = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const lbl = document.getElementById('analysis-mes-label');
+  if (lbl) lbl.textContent = isAnual(curM) ? 'Año completo 2026' : (MNS2[curM] + ' 2026');
+};
+</script>
+</body>
+</html>
